@@ -15,3 +15,11 @@ export const getFullFormatDate = (date) => dayjs(date).format('YYYY/MM/DD HH:mm'
 // for Generator
 export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toDate();
 export const getRandomMinuteDate = (minutesGap) => dayjs().subtract(minutesGap, 'minute').toDate();
+
+export const capitalizeFirstLetter = (str) => {
+  if (!str) {
+    return str;
+  }
+
+  return (str[0].toUpperCase() + str.slice(1));
+};
