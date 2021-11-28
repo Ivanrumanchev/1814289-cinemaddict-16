@@ -1,4 +1,4 @@
-import {getRandomDayDate, getRandomMinuteDate} from '../util.js';
+import {getRandomDayDate, getRandomMinuteDate} from '../utils.js';
 
 const TITLES = [
   'Том и Джери',

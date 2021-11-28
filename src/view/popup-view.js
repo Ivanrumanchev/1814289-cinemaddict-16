@@ -1,23 +1,21 @@
-import {getTimeFromMins, getFullFormatDate, getDayFormatDate} from '../util.js';
+import {getTimeFromMins, getFullFormatDate, getDayFormatDate} from '../utils.js';
 
-export const createCommentTemplate = (comments) => {
-  const {author, comment, date, emotion} = comments;
-  return `<li class="film-details__comment">
-    <span class="film-details__comment-emoji">
-      <img src="./images/emoji/${ emotion }.png" width="55" height="55" alt="emoji-smile">
-    </span>
-    <div>
-      <p class="film-details__comment-text">${ comment }</p>
-      <p class="film-details__comment-info">
-        <span class="film-details__comment-author">${ author }</span>
-        <span class="film-details__comment-day">${ getFullFormatDate(date) }</span>
-        <button class="film-details__comment-delete">Delete</button>
-      </p>
-    </div>
-  </li>`;
-};
+const createCommentsTemplate = (comments) => comments.map(({author, comment, date, emotion}) => (
+  `<li class="film-details__comment">
+  <span class="film-details__comment-emoji">
+    <img src="./images/emoji/${ emotion }.png" width="55" height="55" alt="emoji-smile">
+  </span>
+  <div>
+    <p class="film-details__comment-text">${ comment }</p>
+    <p class="film-details__comment-info">
+      <span class="film-details__comment-author">${ author }</span>
+      <span class="film-details__comment-day">${ getFullFormatDate(date) }</span>
+      <button class="film-details__comment-delete">Delete</button>
+    </p>
+  </div>
+</li>`)).join('');
 
-export const createNewCommentTemplate = () => (
+const createNewCommentTemplate = () => (
   `<div class="film-details__new-comment">
     <div class="film-details__add-emoji-label"></div>
 
@@ -49,17 +47,20 @@ export const createNewCommentTemplate = () => (
   </div>`
 );
 
-export const createCommentsListTemplate = ({comments}) => (
-  `<div class="film-details__bottom-container">
+export const createCommentsListTemplate = (comments) => {
+  const commentsTemplate = createCommentsTemplate(comments);
+  const newCommentTemplate = createNewCommentTemplate();
+
+  return `<div class="film-details__bottom-container">
     <section class="film-details__comments-wrap">
       <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
       <ul class="film-details__comments-list">
-
+        ${ commentsTemplate }
       </ul>
-
+      ${ newCommentTemplate }
     </section>
-  </div>`
-);
+  </div>`;
+};
 
 const createGenres = (genres) => {
   const fragment = [];
@@ -69,9 +70,11 @@ const createGenres = (genres) => {
   return fragment.join('');
 };
 
-export const createPopupTemplate = ({filmInfo, userDetails}) => {
+export const createPopupTemplate = ({comments, filmInfo, userDetails}) => {
   const {title, alternativeTitle, totalRating, poster, release, runtime, genre, description, ageRating, director, writers, actors} = filmInfo;
   const {watchList, alreadyWatched, favorite} = userDetails;
+
+  const commentsListTemplate = createCommentsListTemplate(comments);
 
   return `<section class="film-details">
     <form class="film-details__inner" action="" method="get">
@@ -142,7 +145,7 @@ export const createPopupTemplate = ({filmInfo, userDetails}) => {
           <button type="button" class="film-details__control-button film-details__control-button--favorite${ favorite ? ' film-details__control-button--active' : '' }" id="favorite" name="favorite">Add to favorites</button>
         </section>
       </div>
-
+      ${ commentsListTemplate }
     </form>
   </section>`;
 };

@@ -1,4 +1,4 @@
-import {getTimeFromMins, getYearFormatDate} from '../util.js';
+import {getTimeFromMins, getYearFormatDate} from '../utils.js';
 
 const MAX_LENGTH_DESCRIPTION = 140;
 
@@ -9,7 +9,7 @@ const cutString = (string) => {
   return string;
 };
 
-export const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
+const createFilmCardsTemplate = (cards) => cards.map(({comments, filmInfo, userDetails}) => {
   const {title, totalRating, poster, release, runtime, genre, description} = filmInfo;
   const {watchList, alreadyWatched, favorite} = userDetails;
 
@@ -31,16 +31,18 @@ export const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
       <button class="film-card__controls-item film-card__controls-item--mark-as-watched${ alreadyWatched ? ' film-card__controls-item--active' : '' }" type="button">Mark as watched</button>
       <button class="film-card__controls-item film-card__controls-item--favorite${ favorite ? ' film-card__controls-item--active' : '' }" type="button">Mark as favorite</button>
     </div>
-  </article>`;
-};
+  </article>`;}).join('');
 
-export const createFilmListTemplate = (title = '', extra = false) => (
-  `<section class="films-list${ extra ? ' films-list--extra' : '' }">
+export const createFilmListTemplate = (cards, title = '', extra = false) => {
+
+  const cardsTemplate = createFilmCardsTemplate(cards);
+
+  return `<section class="films-list${ extra ? ' films-list--extra' : '' }">
     <h2 class="films-list__title ${ extra ? '' : 'visually-hidden' }">${ title }</h2>
 
     <div class="films-list__container">
-
+      ${ cardsTemplate }
     </div>
 
-  </section>`
-);
+  </section>`;
+};
