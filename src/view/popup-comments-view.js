@@ -1,4 +1,4 @@
-import {getFullFormatDate} from '../utils.js';
+import {getFullFormatDate, createElement} from '../utils.js';
 
 const createCommentsTemplate = (comments) => comments.map(({author, comment, date, emotion}) => (
   `<li class="film-details__comment">
@@ -47,7 +47,7 @@ const createNewCommentTemplate = () => (
   </div>`
 );
 
-export const createCommentsListTemplate = ({comments}) => {
+const createCommentsListTemplate = ({comments}) => {
   const commentsTemplate = createCommentsTemplate(comments);
   const newCommentTemplate = createNewCommentTemplate();
 
@@ -61,3 +61,28 @@ export const createCommentsListTemplate = ({comments}) => {
     </section>
   </div>`;
 };
+
+export default class PopupCommentsView {
+  #element = null;
+  #cards = null;
+
+  constructor (cards) {
+    this.#cards = cards;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createCommentsListTemplate(this.#cards);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

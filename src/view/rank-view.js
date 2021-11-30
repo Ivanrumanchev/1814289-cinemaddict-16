@@ -1,3 +1,5 @@
+import {createElement} from '../utils.js';
+
 const Ranks = {
   NOVICE: 'Novice',
   FAN: 'Fun',
@@ -21,7 +23,7 @@ const getRank = (cards) => {
   return Ranks.MOVIE_BUFF;
 };
 
-export const createRankTemplate = (cards) => {
+const createRankTemplate = (cards) => {
   const rank = getRank(cards);
 
   return (rank ? `<section class="header__profile profile">
@@ -30,6 +32,27 @@ export const createRankTemplate = (cards) => {
   </section>` : '');
 };
 
-export const createQuantityFilmsTemplate = (cards) => (
-  `<p>${ cards.length } movies inside</p>`
-);
+export default class RankView {
+  #element = null;
+  #cards = null;
+
+  constructor (cards) {
+    this.#cards = cards;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createRankTemplate(this.#cards);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

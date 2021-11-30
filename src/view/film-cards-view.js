@@ -1,4 +1,4 @@
-import {getTimeFromMins, getYearFormatDate} from '../utils.js';
+import {getTimeFromMins, getYearFormatDate, createElement} from '../utils.js';
 
 const MAX_LENGTH_DESCRIPTION = 140;
 
@@ -9,7 +9,7 @@ const cutString = (string) => {
   return string;
 };
 
-export const createFilmCardsTemplate = (cards) => cards.map(({comments, filmInfo, userDetails}) => {
+const createFilmCardsTemplate = ({comments, filmInfo, userDetails}) => {
   const {title, totalRating, poster, release, runtime, genre, description} = filmInfo;
   const {watchList, alreadyWatched, favorite} = userDetails;
 
@@ -31,4 +31,30 @@ export const createFilmCardsTemplate = (cards) => cards.map(({comments, filmInfo
       <button class="film-card__controls-item film-card__controls-item--mark-as-watched${ alreadyWatched ? ' film-card__controls-item--active' : '' }" type="button">Mark as watched</button>
       <button class="film-card__controls-item film-card__controls-item--favorite${ favorite ? ' film-card__controls-item--active' : '' }" type="button">Mark as favorite</button>
     </div>
-  </article>`;}).join('');
+  </article>`;
+};
+
+export default class FilmCardView {
+  #element = null;
+  #cards = null;
+
+  constructor (cards) {
+    this.#cards = cards;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createFilmCardsTemplate(this.#cards);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

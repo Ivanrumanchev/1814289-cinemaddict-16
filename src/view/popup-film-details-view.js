@@ -1,4 +1,4 @@
-import {getTimeFromMins, getDayFormatDate} from '../utils.js';
+import {getTimeFromMins, getDayFormatDate, createElement} from '../utils.js';
 
 const createGenres = (genres) => {
   const fragment = [];
@@ -8,7 +8,7 @@ const createGenres = (genres) => {
   return fragment.join('');
 };
 
-export const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
+const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
   const {title, alternativeTitle, totalRating, poster, release, runtime, genre, description, ageRating, director, writers, actors} = filmInfo;
   const {watchList, alreadyWatched, favorite} = userDetails;
 
@@ -80,3 +80,28 @@ export const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
     </section>
   </div>`;
 };
+
+export default class PopupFilmDetailsView {
+  #element = null;
+  #cards = null;
+
+  constructor (cards) {
+    this.#cards = cards;
+  }
+
+  get element() {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template() {
+    return createFilmDetailsTemplate(this.#cards);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}
