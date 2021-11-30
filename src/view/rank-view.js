@@ -4,13 +4,18 @@ const Ranks = {
   MOVIE_BUFF: 'Movie Buff',
 };
 
+const QuantityLevel = {
+  NOVICE: 10,
+  FAN: 20,
+};
+
 const getRank = (cards) => {
   const quantityFilms = cards.filter((card) => card.userDetails.alreadyWatched).length;
   if (!quantityFilms) {
     return '';
-  } else if (quantityFilms <= 10) {
+  } else if (quantityFilms <= QuantityLevel.NOVICE) {
     return Ranks.NOVICE;
-  } else if ( (quantityFilms > 10) && (quantityFilms <= 20) ) {
+  } else if ( (quantityFilms > QuantityLevel.NOVICE) && (quantityFilms <= QuantityLevel.FAN) ) {
     return Ranks.FAN;
   }
   return Ranks.MOVIE_BUFF;

@@ -32,35 +32,3 @@ export const createFilmCardsTemplate = (cards) => cards.map(({comments, filmInfo
       <button class="film-card__controls-item film-card__controls-item--favorite${ favorite ? ' film-card__controls-item--active' : '' }" type="button">Mark as favorite</button>
     </div>
   </article>`;}).join('');
-
-export const createFilmListTemplate = (cards, title = '', extra = false) => {
-
-  const cardsTemplate = createFilmCardsTemplate(cards);
-
-  return `<section class="films">
-    <section class="films-list${ extra ? ' films-list--extra' : '' }">
-      <h2 class="films-list__title ${ extra ? '' : 'visually-hidden' }">${ title }</h2>
-
-      <div class="films-list__container">
-        ${ cardsTemplate }
-      </div>
-
-    </section>
-  </section>`;
-};
-
-export const createEmptyFilmListTemplate = (template) => (
-  `<section class="films">
-    <section class="films-list">
-      <h2 class="films-list__title">There are no movies in our database</h2>
-      ${ template }
-      <!--
-        Значение отображаемого текста зависит от выбранного фильтра:
-          * All movies – 'There are no movies in our database'
-          * Watchlist — 'There are no movies to watch now';
-          * History — 'There are no watched movies now';
-          * Favorites — 'There are no favorite movies now'.
-      -->
-    </section>
-  </section>`
-);
