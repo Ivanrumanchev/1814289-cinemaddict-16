@@ -9,7 +9,7 @@ const cutString = (string) => {
   return string;
 };
 
-const createFilmCardsTemplate = ({comments, filmInfo, userDetails}) => {
+const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
   const {title, totalRating, poster, release, runtime, genre, description} = filmInfo;
   const {watchList, alreadyWatched, favorite} = userDetails;
 
@@ -51,7 +51,7 @@ export default class FilmCardView {
   }
 
   get template() {
-    return createFilmCardsTemplate(this.#cards);
+    return createFilmCardTemplate(this.#cards);
   }
 
   removeElement() {

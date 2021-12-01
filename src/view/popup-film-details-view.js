@@ -1,16 +1,16 @@
 import {getTimeFromMins, getDayFormatDate, createElement} from '../utils.js';
 
-const createGenres = (genres) => {
-  const fragment = [];
-  for (let i = 0; i < genres.length; i++) {
-    fragment[i] = `<span class="film-details__genre">${ genres[i] }</span>`;
-  }
-  return fragment.join('');
-};
+const createGenresTemplate = (genres) => (
+  genres
+    .map((genre) => `<span class="film-details__genre">${ genre }</span>`)
+    .join('')
+);
 
 const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
   const {title, alternativeTitle, totalRating, poster, release, runtime, genre, description, ageRating, director, writers, actors} = filmInfo;
   const {watchList, alreadyWatched, favorite} = userDetails;
+
+  const genresTemplate = createGenresTemplate(genre);
 
   return `<div class="film-details__top-container">
     <div class="film-details__close">
@@ -63,7 +63,7 @@ const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
           <tr class="film-details__row">
             <td class="film-details__term">${ genre.length === 1 ? 'Genre' : 'Genres' }</td>
             <td class="film-details__cell">
-              ${ createGenres(genre) }
+              ${ genresTemplate }
           </tr>
         </table>
 

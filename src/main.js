@@ -8,13 +8,15 @@ import SortView from './view/sort-view.js';
 
 import FilmsContainerView from './view/films-container-view.js';
 import FilmsListView from './view/films-list-view.js';
-import FilmCardView from './view/film-cards-view.js';
+import FilmCardView from './view/film-card-view.js';
 
 import ButtonShowMoreView from './view/button-show-more-view.js';
 
 import PopupView from './view/popup-view.js';
 import PopupFilmDetailsView from './view/popup-film-details-view.js';
-import PopupCommentsView from './view/popup-comments-view.js';
+import PopupCommentsListView from './view/popup-comments-list-view.js';
+import PopupCommentView from './view/popup-comment-view.js';
+import PopupNewCommentView from './view/popup-new-comment-view.js';
 
 import {generateMovie} from './mock/movie.js';
 import {generateFilter} from './mock/filter.js';
@@ -39,21 +41,28 @@ const renderCard = (filmsListElement, card) => {
 
   const popupComponent = new PopupView();
   const popupFilmDetailsComponent = new PopupFilmDetailsView(card);
-  const popupCommentsComponent = new PopupCommentsView(card);
+  const popupCommentsListComponent = new PopupCommentsListView(card);
+  const popupCommentComponents = card.comments.map((comment) => new PopupCommentView(comment));
+  const popupNewCommentComponent = new PopupNewCommentView();
 
   const filmDetails = popupComponent.element.querySelector('.film-details__inner');
+  const commentsList = popupCommentsListComponent.element.querySelector('.film-details__comments-list');
 
   const onCloseButtonClick = () => {
     document.body.classList.remove('hide-overflow');
     popupComponent.element.remove();
-    popupFilmDetailsComponent.element.remove();
-    popupCommentsComponent.element.remove();
+    // popupFilmDetailsComponent.element.remove();
+    // popupCommentsListComponent.element.remove();
+    // popupCommentComponents.forEach((component) => component.element.remove());
+    // popupNewCommentComponent.element.remove();
   };
 
   const onFilmCardClick = () => {
     render(siteFooterElement, popupComponent.element, RenderPosition.AFTEREND);
     render(filmDetails, popupFilmDetailsComponent.element, RenderPosition.AFTERBEGIN);
-    render(filmDetails, popupCommentsComponent.element, RenderPosition.BEFOREEND);
+    render(filmDetails, popupCommentsListComponent.element, RenderPosition.BEFOREEND);
+    popupCommentComponents.forEach((component) => render(commentsList, component.element, RenderPosition.BEFOREEND));
+    render(commentsList, popupNewCommentComponent.element, RenderPosition.AFTEREND);
 
     document.body.classList.add('hide-overflow');
 
