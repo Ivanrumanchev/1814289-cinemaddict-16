@@ -1,64 +1,134 @@
-import {renderTemplate, RenderPosition} from './render.js';
-import {createRankTemplate, createQuantityFilmsTemplate} from './view/common-container-view.js';
-import {createFiltersTemplate} from './view/filter-view.js';
-import {createSortTemplate} from './view/sort-view.js';
-import {createFilmListTemplate, createFilmCardsTemplate} from './view/film-list-view.js';
-import {createButtonShowMoreTemplate} from './view/button-show-more-view.js';
-import {createPopupTemplate} from './view/popup-view.js';
+import {RenderPosition, render} from './render.js';
+
+import RankView from './view/rank-view.js';
+import QuantityFilmsView from './view/quantity-films-view.js';
+
+import FiltersView from './view/filters-view.js';
+import SortView from './view/sort-view.js';
+
+import FilmsContainerView from './view/films-container-view.js';
+import FilmsListView from './view/films-list-view.js';
+import FilmCardView from './view/film-cards-view.js';
+
+import ButtonShowMoreView from './view/button-show-more-view.js';
+
+import PopupView from './view/popup-view.js';
+import PopupFilmDetailsView from './view/popup-film-details-view.js';
+import PopupCommentsView from './view/popup-comments-view.js';
+
 import {generateMovie} from './mock/movie.js';
 import {generateFilter} from './mock/filter.js';
 
 const FILM_COUNT = 23;
 const FILM_COUNT_PER_STEP = 5;
+const FILM_COUNT_EXTRA = 2;
+
+const FilmsListTitles = {
+  COMMON: 'All movies. Upcoming',
+  TOP_RATED: 'Top rated',
+  MOST_COMMENTED: 'Most commented',
+};
 
 const siteMainElement = document.querySelector('.main');
 const siteHeaderElement = document.querySelector('.header');
 const siteFooterElement = document.querySelector('.footer');
 const footerStatisticsElement = siteFooterElement.querySelector('.footer__statistics');
 
+const renderCard = (filmsListElement, card) => {
+  const cardComponent = new FilmCardView(card);
+
+  const popupComponent = new PopupView();
+  const popupFilmDetailsComponent = new PopupFilmDetailsView(card);
+  const popupCommentsComponent = new PopupCommentsView(card);
+
+  const filmDetails = popupComponent.element.querySelector('.film-details__inner');
+
+  const onCloseButtonClick = () => {
+    document.body.classList.remove('hide-overflow');
+    popupComponent.element.remove();
+    popupFilmDetailsComponent.element.remove();
+    popupCommentsComponent.element.remove();
+  };
+
+  const onFilmCardClick = () => {
+    render(siteFooterElement, popupComponent.element, RenderPosition.AFTEREND);
+    render(filmDetails, popupFilmDetailsComponent.element, RenderPosition.AFTERBEGIN);
+    render(filmDetails, popupCommentsComponent.element, RenderPosition.BEFOREEND);
+
+    document.body.classList.add('hide-overflow');
+
+    filmDetails.querySelector('.film-details__close-btn').addEventListener('click', onCloseButtonClick);
+  };
+
+  cardComponent.element.querySelector('.film-card__link').addEventListener('click', onFilmCardClick);
+
+  render(filmsListElement, cardComponent.element, RenderPosition.BEFOREEND);
+};
+
 const cards = Array.from( {length: FILM_COUNT}, generateMovie );
 const filters = generateFilter(cards);
 
 // Звание и кол-во фильмов в сервисе
 
-renderTemplate(siteHeaderElement, createRankTemplate(cards), RenderPosition.BEFOREEND);
-renderTemplate(footerStatisticsElement, createQuantityFilmsTemplate(cards), RenderPosition.AFTERBEGIN);
+render(siteHeaderElement, new RankView(cards).element, RenderPosition.BEFOREEND);
+render(footerStatisticsElement, new QuantityFilmsView(cards).element, RenderPosition.AFTERBEGIN);
 
 // Сортировка и фильтры
 
-renderTemplate(siteMainElement, createSortTemplate(), RenderPosition.AFTERBEGIN);
-renderTemplate(siteMainElement, createFiltersTemplate(filters), RenderPosition.AFTERBEGIN);
+render(siteMainElement, new SortView().element, RenderPosition.AFTERBEGIN);
+render(siteMainElement, new FiltersView(filters).element, RenderPosition.AFTERBEGIN);
 
-// Список фильмов и кнопка ShowMore
+// Список фильмов Common и кнопка ShowMore
 
-renderTemplate(siteMainElement, createFilmListTemplate( cards.slice(0, Math.min(cards.length, FILM_COUNT_PER_STEP)) ), RenderPosition.BEFOREEND);
+const filmsContainer = new FilmsContainerView();
+render(siteMainElement, filmsContainer.element, RenderPosition.BEFOREEND);
+const filmsListCommon = new FilmsListView(FilmsListTitles.COMMON);
+render(filmsContainer.element, filmsListCommon.element, RenderPosition.BEFOREEND);
 
-const filmsList = siteMainElement.querySelector('.films-list');
-const filmsListContainer = filmsList.querySelector('.films-list__container');
+const filmsListCommonContainer = filmsListCommon.element.querySelector('.films-list__container');
+
+cards
+  .slice(0, Math.min(cards.length, FILM_COUNT_PER_STEP))
+  .forEach((card) => renderCard(filmsListCommonContainer, card));
 
 if (cards.length > FILM_COUNT_PER_STEP) {
+  const showMoreButton = new ButtonShowMoreView();
+  render(filmsListCommon.element, showMoreButton.element, RenderPosition.BEFOREEND);
+
   let renderedCardCount = FILM_COUNT_PER_STEP;
-
-  renderTemplate(filmsList, createButtonShowMoreTemplate(), RenderPosition.BEFOREEND);
-
-  const showMoreButton = filmsList.querySelector('.films-list__show-more');
-
-  showMoreButton.addEventListener('click', (evt) => {
-    evt.preventDefault();
-
-    const cardsForRender = cards.slice(renderedCardCount, renderedCardCount + FILM_COUNT_PER_STEP);
-
-    renderTemplate(filmsListContainer, createFilmCardsTemplate(cardsForRender), RenderPosition.BEFOREEND);
+  const onShowMoreButtonClick = () => {
+    cards
+      .slice(renderedCardCount, renderedCardCount + FILM_COUNT_PER_STEP)
+      .forEach((card) => renderCard(filmsListCommonContainer, card));
 
     renderedCardCount += FILM_COUNT_PER_STEP;
 
     if (renderedCardCount >= cards.length) {
-      showMoreButton.remove();
+      showMoreButton.element.remove();
     }
-  });
+  };
+
+  showMoreButton.element.addEventListener('click', onShowMoreButtonClick);
 }
 
-// Попап
+// Список фильмов Top Rated
 
-renderTemplate(siteFooterElement, createPopupTemplate(cards[0]), RenderPosition.AFTEREND);
+const filmsListTopRated = new FilmsListView(FilmsListTitles.TOP_RATED, true);
+render(filmsContainer.element, filmsListTopRated.element, RenderPosition.BEFOREEND);
 
+const filmsListTopRatedContainer = filmsListTopRated.element.querySelector('.films-list__container');
+
+cards
+  .slice(0, FILM_COUNT_EXTRA)
+  .forEach((card) => renderCard(filmsListTopRatedContainer, card));
+
+// Список фильмов Most Commented
+
+const filmsListMostCommented = new FilmsListView(FilmsListTitles.MOST_COMMENTED, true);
+render(filmsContainer.element, filmsListMostCommented.element, RenderPosition.BEFOREEND);
+
+const filmsListMostCommentedContainer = filmsListMostCommented.element.querySelector('.films-list__container');
+
+cards
+  .slice(0, FILM_COUNT_EXTRA)
+  .forEach((card) => renderCard(filmsListMostCommentedContainer, card));
