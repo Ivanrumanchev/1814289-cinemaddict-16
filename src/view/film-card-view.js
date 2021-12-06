@@ -1,4 +1,5 @@
-import {getTimeFromMins, getYearFormatDate, createElement} from '../utils.js';
+import {getTimeFromMins, getYearFormatDate} from '../utils/common.js';
+import AbstractView from './abstract-view.js';
 
 const MAX_LENGTH_DESCRIPTION = 140;
 
@@ -34,27 +35,24 @@ const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
   </article>`;
 };
 
-export default class FilmCardView {
-  #element = null;
+export default class FilmCardView extends AbstractView {
   #cards = null;
 
-  constructor (cards) {
-    this.#cards = cards;
+  setOpenPopupClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.film-card__link').addEventListener('click', this.#openPopupClickHandler);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  #openPopupClickHandler = () => {
+    this._callback.click();
+  }
 
-    return this.#element;
+  constructor (cards) {
+    super();
+    this.#cards = cards;
   }
 
   get template() {
     return createFilmCardTemplate(this.#cards);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

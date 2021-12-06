@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractView from './abstract-view.js';
 
 const createCommentsListTemplate = ({comments}) => (
   `<div class="film-details__bottom-container">
@@ -12,27 +12,15 @@ const createCommentsListTemplate = ({comments}) => (
   </div>`
 );
 
-export default class PopupCommentsListView {
-  #element = null;
+export default class PopupCommentsListView extends AbstractView {
   #card = null;
 
   constructor (card) {
+    super();
     this.#card = card;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createCommentsListTemplate(this.#card);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

@@ -1,4 +1,5 @@
-import {capitalizeFirstLetter, createElement} from '../utils.js';
+import {capitalizeFirstLetter} from '../utils/common.js';
+import AbstractView from './abstract-view.js';
 
 const createFilterItemTemplate = (filter) => {
   const {name, count} = filter;
@@ -15,27 +16,15 @@ const createFiltersTemplate = (filters) => (
   </nav>`
 );
 
-export default class FiltersView {
-  #element = null;
+export default class FiltersView extends AbstractView {
   #filters = null;
 
   constructor (filters) {
+    super();
     this.#filters = filters;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createFiltersTemplate(this.#filters);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

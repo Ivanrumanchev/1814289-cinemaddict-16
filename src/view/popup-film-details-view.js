@@ -1,4 +1,5 @@
-import {getTimeFromMins, getDayFormatDate, createElement} from '../utils.js';
+import {getTimeFromMins, getDayFormatDate} from '../utils/common.js';
+import AbstractView from './abstract-view.js';
 
 const createGenresTemplate = (genres) => (
   genres
@@ -81,27 +82,24 @@ const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
   </div>`;
 };
 
-export default class PopupFilmDetailsView {
-  #element = null;
+export default class PopupFilmDetailsView extends AbstractView {
   #cards = null;
 
-  constructor (cards) {
-    this.#cards = cards;
+  setClosePopupClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closePopupClickHandler);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  #closePopupClickHandler = () => {
+    this._callback.click();
+  }
 
-    return this.#element;
+  constructor (cards) {
+    super();
+    this.#cards = cards;
   }
 
   get template() {
     return createFilmDetailsTemplate(this.#cards);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

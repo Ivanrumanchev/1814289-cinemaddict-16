@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractView from './abstract-view.js';
 
 const createPopupTemplate = () => (
   `<section class="film-details">
@@ -8,22 +8,8 @@ const createPopupTemplate = () => (
   </section>`
 );
 
-export default class PopupView {
-  #element = null;
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
+export default class PopupView extends AbstractView {
   get template() {
     return createPopupTemplate();
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractView from './abstract-view.js';
 
 const createStatisticsTemplate = () => (
   `<section class="statistic">
@@ -52,22 +52,8 @@ const createStatisticsTemplate = () => (
   </section>`
 );
 
-export default class StatisticsView {
-  #element = null;
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
+export default class StatisticsView extends AbstractView {
   get template() {
     return createStatisticsTemplate();
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }
