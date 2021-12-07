@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractView from './abstract-view.js';
 
 const Ranks = {
   NOVICE: 'Novice',
@@ -32,27 +32,15 @@ const createRankTemplate = (cards) => {
   </section>` : '<section class="visually-hidden"></section>');
 };
 
-export default class RankView {
-  #element = null;
+export default class RankView extends AbstractView {
   #cards = null;
 
   constructor (cards) {
+    super();
     this.#cards = cards;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createRankTemplate(this.#cards);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

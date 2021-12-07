@@ -1,4 +1,5 @@
-import {getFullFormatDate, createElement} from '../utils.js';
+import {getFullFormatDate} from '../utils/common.js';
+import AbstractView from './abstract-view.js';
 
 const createCommentTemplate = ({author, comment, date, emotion}) => (
   `<li class="film-details__comment">
@@ -15,27 +16,15 @@ const createCommentTemplate = ({author, comment, date, emotion}) => (
   </div>
 </li>`);
 
-export default class PopupCommentView {
-  #element = null;
+export default class PopupCommentView extends AbstractView {
   #comment = null;
 
   constructor (comment) {
+    super();
     this.#comment = comment;
-  }
-
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template() {
     return createCommentTemplate(this.#comment);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }
