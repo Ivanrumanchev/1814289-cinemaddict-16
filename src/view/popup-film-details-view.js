@@ -85,15 +85,6 @@ const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
 export default class PopupFilmDetailsView extends AbstractView {
   #cards = null;
 
-  setClosePopupClickHandler = (callback) => {
-    this._callback.click = callback;
-    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closePopupClickHandler);
-  }
-
-  #closePopupClickHandler = () => {
-    this._callback.click();
-  }
-
   constructor (cards) {
     super();
     this.#cards = cards;
@@ -101,5 +92,14 @@ export default class PopupFilmDetailsView extends AbstractView {
 
   get template() {
     return createFilmDetailsTemplate(this.#cards);
+  }
+
+  setClosePopupClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closePopupClickHandler);
+  }
+
+  #closePopupClickHandler = () => {
+    this._callback.click();
   }
 }
