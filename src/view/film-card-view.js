@@ -1,11 +1,5 @@
 import {getTimeFromMins, getYearFormatDate} from '../utils/common.js';
-import {RenderPosition, render, remove} from '../utils/render.js';
 import AbstractView from './abstract-view.js';
-import PopupView from './popup-view.js';
-import PopupFilmDetailsView from './popup-film-details-view.js';
-import PopupCommentsListView from './popup-comments-list-view.js';
-import PopupCommentView from './popup-comment-view.js';
-import PopupNewCommentView from './popup-new-comment-view.js';
 
 const MAX_LENGTH_DESCRIPTION = 140;
 
@@ -43,6 +37,7 @@ const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
 
 export default class FilmCardView extends AbstractView {
   #card = null;
+  _callback = new Map();
 
   constructor (card) {
     super();
@@ -53,57 +48,39 @@ export default class FilmCardView extends AbstractView {
     return createFilmCardTemplate(this.#card);
   }
 
-  init() {
-    const popupComponent = new PopupView();
-    const popupFilmDetailsComponent = new PopupFilmDetailsView(this.#card);
-    const popupCommentsListComponent = new PopupCommentsListView(this.#card);
-    const popupCommentComponents = this.#card.comments.map((comment) => new PopupCommentView(comment));
-    const popupNewCommentComponent = new PopupNewCommentView();
-
-    const onCloseButtonClick = () => {
-      document.body.classList.remove('hide-overflow');
-      remove(popupComponent);
-      remove(popupFilmDetailsComponent);
-      remove(popupCommentsListComponent);
-      popupCommentComponents.forEach((component) => remove(component));
-      remove(popupNewCommentComponent);
-    };
-
-    const onFilmCardClick = () => {
-      const filmDetails = popupComponent.element.querySelector('.film-details__inner');
-      const commentsList = popupCommentsListComponent.element.querySelector('.film-details__comments-list');
-      popupCommentComponents.forEach((component) => render(commentsList, component, RenderPosition.BEFOREEND));
-      render(commentsList, popupNewCommentComponent, RenderPosition.AFTEREND);
-      render(filmDetails, popupCommentsListComponent, RenderPosition.BEFOREEND);
-      render(filmDetails, popupFilmDetailsComponent, RenderPosition.AFTERBEGIN);
-      render(document.body, popupComponent, RenderPosition.BEFOREEND);
-      document.body.classList.add('hide-overflow');
-    };
-
-    const onEscKeyDown = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        onCloseButtonClick();
-        document.removeEventListener('keydown', onEscKeyDown);
-      }
-    };
-
-    this.setOpenPopupClickHandler(() => {
-      onFilmCardClick();
-      document.addEventListener('keydown', onEscKeyDown);
-      popupFilmDetailsComponent.setClosePopupClickHandler(() => {
-        onCloseButtonClick();
-        document.removeEventListener('keydown', onEscKeyDown);
-      });
-    });
-  }
-
   setOpenPopupClickHandler = (callback) => {
-    this._callback.click = callback;
+    this._callback.set('openPopupClick', callback);
     this.element.querySelector('.film-card__link').addEventListener('click', this.#openPopupClickHandler);
   }
 
+  setAddToWatchListClickHandler = (callback) => {
+    this._callback.set('addToWatchListClick', callback);
+    this.element.querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click', this.#addToWatchListClickHandler);
+  }
+
+  setMarkAsWatchedClickHandler = (callback) => {
+    this._callback.set('markAsWatchedClick', callback);
+    this.element.querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this.#markAsWatchedClickHandler);
+  }
+
+  setFavoriteClickHandler = (callback) => {
+    this._callback.set('favoriteClick', callback);
+    this.element.querySelector('.film-card__controls-item--favorite').addEventListener('click', this.#favoriteClickHandler);
+  }
+
   #openPopupClickHandler = () => {
-    this._callback.click();
+    this._callback.get('openPopupClick')();
+  }
+
+  #addToWatchListClickHandler = () => {
+    this._callback.get('addToWatchListClick')();
+  }
+
+  #markAsWatchedClickHandler = () => {
+    this._callback.get('markAsWatchedClick')();
+  }
+
+  #favoriteClickHandler = () => {
+    this._callback.get('favoriteClick')();
   }
 }

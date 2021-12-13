@@ -6,7 +6,8 @@ import QuantityFilmsView from './view/quantity-films-view.js';
 import FiltersView from './view/filters-view.js';
 import SortView from './view/sort-view.js';
 
-import FilmsContainerView from './view/films-container-view.js';
+// import FilmsContainerView from './view/films-container-view.js';
+import FilmsContainerPresenter from './presenter/films-container-presenter.js';
 
 import {generateMovie} from './mock/movie.js';
 import {generateFilter} from './mock/filter.js';
@@ -33,6 +34,9 @@ render(siteMainElement, new FiltersView(filters), RenderPosition.AFTERBEGIN);
 
 // Список фильмов Common и кнопка ShowMore
 
-const filmsContainer = new FilmsContainerView(cards);
-filmsContainer.init();
-render(siteMainElement, filmsContainer, RenderPosition.BEFOREEND);
+// const filmsContainer = new FilmsContainerView(cards);
+// filmsContainer.init();
+// render(siteMainElement, filmsContainer, RenderPosition.BEFOREEND);
+const filmsContainerPresenter = new FilmsContainerPresenter(siteMainElement);
+filmsContainerPresenter.init(cards);
+

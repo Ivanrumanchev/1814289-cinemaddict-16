@@ -84,6 +84,7 @@ const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
 
 export default class PopupFilmDetailsView extends AbstractView {
   #cards = null;
+  _callback = new Map();
 
   constructor (cards) {
     super();
@@ -95,11 +96,38 @@ export default class PopupFilmDetailsView extends AbstractView {
   }
 
   setClosePopupClickHandler = (callback) => {
-    this._callback.click = callback;
+    this._callback.set('closePopupClick', callback);
     this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closePopupClickHandler);
   }
 
+  setAddToWatchListClickHandler = (callback) => {
+    this._callback.set('addToWatchListClick', callback);
+    this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#addToWatchListClickHandler);
+  }
+
+  setMarkAsWatchedClickHandler = (callback) => {
+    this._callback.set('markAsWatchedClick', callback);
+    this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#markAsWatchedClickHandler);
+  }
+
+  setFavoriteClickHandler = (callback) => {
+    this._callback.set('favoriteClick', callback);
+    this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
+  }
+
   #closePopupClickHandler = () => {
-    this._callback.click();
+    this._callback.get('closePopupClick')();
+  }
+
+  #addToWatchListClickHandler = () => {
+    this._callback.get('addToWatchListClick')();
+  }
+
+  #markAsWatchedClickHandler = () => {
+    this._callback.get('markAsWatchedClick')();
+  }
+
+  #favoriteClickHandler = () => {
+    this._callback.get('favoriteClick')();
   }
 }
