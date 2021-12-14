@@ -7,6 +7,7 @@ import PopupCommentView from '../view/popup-comment-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
 
 import {RenderPosition, render, remove, replace} from '../utils/render.js';
+import {getDeepCopy} from '../utils/common.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -121,10 +122,8 @@ export default class FilmCardPresenter {
   }
 
   #createNewCardChanged = (property) => {
-    const newCard = Object.assign({}, this.#card);
-    const newCardUserDetails = Object.assign({}, this.#card.userDetails);
-    newCardUserDetails[property] = !this.#card.userDetails[property];
-    newCard.userDetails = newCardUserDetails;
+    const newCard = getDeepCopy(this.#card);
+    newCard.userDetails[property] = !newCard.userDetails[property];
     return newCard;
   }
 

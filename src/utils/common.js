@@ -13,8 +13,8 @@ export const getDayFormatDate = (date) => dayjs(date).format('D MMMM YYYY');
 export const getFullFormatDate = (date) => dayjs(date).format('YYYY/MM/DD HH:mm');
 
 // for Generator
-export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toDate();
-export const getRandomMinuteDate = (minutesGap) => dayjs().subtract(minutesGap, 'minute').toDate();
+export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toString();
+export const getRandomMinuteDate = (minutesGap) => dayjs().subtract(minutesGap, 'minute').toString();
 
 export const capitalizeFirstLetter = (str) => {
   if (!str) {
@@ -24,7 +24,6 @@ export const capitalizeFirstLetter = (str) => {
   return (str[0].toUpperCase() + str.slice(1));
 };
 
-// \\\\\\\\
 
 export const updateItem = (items, update) => {
   const index = items.findIndex((item) => item.id === update.id);
@@ -39,3 +38,23 @@ export const updateItem = (items, update) => {
     ...items.slice(index + 1),
   ];
 };
+
+export const getDeepCopy = (inObject) => {
+  if (typeof inObject !== 'object' || inObject === null) {
+    return inObject;
+  }
+
+  const outObject = Array.isArray(inObject) ? [] : {};
+
+  for (const key in inObject) {
+    const value = inObject[key];
+
+    outObject[key] = getDeepCopy(value);
+  }
+
+  return outObject;
+};
+
+export const sortCardDate = (cardA, cardB) => dayjs(cardB.filmInfo.release.date).diff(dayjs(cardA.filmInfo.release.date));
+export const sortCardRating = (cardA, cardB) => cardB.filmInfo.totalRating - cardA.filmInfo.totalRating;
+export const sortCardComments = (cardA, cardB) => cardB.comments.length - cardA.comments.length;

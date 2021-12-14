@@ -84,7 +84,7 @@ const createFilmDetailsTemplate = ({filmInfo, userDetails}) => {
 
 export default class PopupFilmDetailsView extends AbstractView {
   #cards = null;
-  _callback = new Map();
+  #callback = new Map();
 
   constructor (cards) {
     super();
@@ -96,38 +96,38 @@ export default class PopupFilmDetailsView extends AbstractView {
   }
 
   setClosePopupClickHandler = (callback) => {
-    this._callback.set('closePopupClick', callback);
+    this.#callback.set('closePopupClick', callback);
     this.element.querySelector('.film-details__close-btn').addEventListener('click', this.#closePopupClickHandler);
   }
 
   setAddToWatchListClickHandler = (callback) => {
-    this._callback.set('addToWatchListClick', callback);
+    this.#callback.set('addToWatchListClick', callback);
     this.element.querySelector('.film-details__control-button--watchlist').addEventListener('click', this.#addToWatchListClickHandler);
   }
 
   setMarkAsWatchedClickHandler = (callback) => {
-    this._callback.set('markAsWatchedClick', callback);
+    this.#callback.set('markAsWatchedClick', callback);
     this.element.querySelector('.film-details__control-button--watched').addEventListener('click', this.#markAsWatchedClickHandler);
   }
 
   setFavoriteClickHandler = (callback) => {
-    this._callback.set('favoriteClick', callback);
+    this.#callback.set('favoriteClick', callback);
     this.element.querySelector('.film-details__control-button--favorite').addEventListener('click', this.#favoriteClickHandler);
   }
 
   #closePopupClickHandler = () => {
-    this._callback.get('closePopupClick')();
+    this.#callback.get('closePopupClick')();
   }
 
   #addToWatchListClickHandler = () => {
-    this._callback.get('addToWatchListClick')();
+    this.#callback.get('addToWatchListClick')();
   }
 
   #markAsWatchedClickHandler = () => {
-    this._callback.get('markAsWatchedClick')();
+    this.#callback.get('markAsWatchedClick')();
   }
 
   #favoriteClickHandler = () => {
-    this._callback.get('favoriteClick')();
+    this.#callback.get('favoriteClick')();
   }
 }

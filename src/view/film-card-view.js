@@ -37,7 +37,7 @@ const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
 
 export default class FilmCardView extends AbstractView {
   #card = null;
-  _callback = new Map();
+  #callback = new Map();
 
   constructor (card) {
     super();
@@ -49,38 +49,38 @@ export default class FilmCardView extends AbstractView {
   }
 
   setOpenPopupClickHandler = (callback) => {
-    this._callback.set('openPopupClick', callback);
+    this.#callback.set('openPopupClick', callback);
     this.element.querySelector('.film-card__link').addEventListener('click', this.#openPopupClickHandler);
   }
 
   setAddToWatchListClickHandler = (callback) => {
-    this._callback.set('addToWatchListClick', callback);
+    this.#callback.set('addToWatchListClick', callback);
     this.element.querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click', this.#addToWatchListClickHandler);
   }
 
   setMarkAsWatchedClickHandler = (callback) => {
-    this._callback.set('markAsWatchedClick', callback);
+    this.#callback.set('markAsWatchedClick', callback);
     this.element.querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this.#markAsWatchedClickHandler);
   }
 
   setFavoriteClickHandler = (callback) => {
-    this._callback.set('favoriteClick', callback);
+    this.#callback.set('favoriteClick', callback);
     this.element.querySelector('.film-card__controls-item--favorite').addEventListener('click', this.#favoriteClickHandler);
   }
 
   #openPopupClickHandler = () => {
-    this._callback.get('openPopupClick')();
+    this.#callback.get('openPopupClick')();
   }
 
   #addToWatchListClickHandler = () => {
-    this._callback.get('addToWatchListClick')();
+    this.#callback.get('addToWatchListClick')();
   }
 
   #markAsWatchedClickHandler = () => {
-    this._callback.get('markAsWatchedClick')();
+    this.#callback.get('markAsWatchedClick')();
   }
 
   #favoriteClickHandler = () => {
-    this._callback.get('favoriteClick')();
+    this.#callback.get('favoriteClick')();
   }
 }

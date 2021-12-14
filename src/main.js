@@ -4,10 +4,8 @@ import RankView from './view/rank-view.js';
 import QuantityFilmsView from './view/quantity-films-view.js';
 
 import FiltersView from './view/filters-view.js';
-import SortView from './view/sort-view.js';
 
-// import FilmsContainerView from './view/films-container-view.js';
-import FilmsContainerPresenter from './presenter/films-container-presenter.js';
+import MovieListPresenter from './presenter/movie-list-presenter.js';
 
 import {generateMovie} from './mock/movie.js';
 import {generateFilter} from './mock/filter.js';
@@ -27,16 +25,11 @@ const filters = generateFilter(cards);
 render(siteHeaderElement, new RankView(cards), RenderPosition.BEFOREEND);
 render(footerStatisticsElement, new QuantityFilmsView(cards), RenderPosition.AFTERBEGIN);
 
-// Сортировка и фильтры
+// Фильтры
 
-render(siteMainElement, new SortView(), RenderPosition.AFTERBEGIN);
 render(siteMainElement, new FiltersView(filters), RenderPosition.AFTERBEGIN);
 
-// Список фильмов Common и кнопка ShowMore
+// Сортировка и фильмы
 
-// const filmsContainer = new FilmsContainerView(cards);
-// filmsContainer.init();
-// render(siteMainElement, filmsContainer, RenderPosition.BEFOREEND);
-const filmsContainerPresenter = new FilmsContainerPresenter(siteMainElement);
-filmsContainerPresenter.init(cards);
-
+const movieListPresenter = new MovieListPresenter(siteMainElement);
+movieListPresenter.init(cards);
