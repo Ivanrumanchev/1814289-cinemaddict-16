@@ -5,16 +5,18 @@ const createButtonShowMoreTemplate = () => (
 );
 
 export default class ButtonShowMoreView extends AbstractView {
+  #callback = new Map();
+
   get template() {
     return createButtonShowMoreTemplate();
   }
 
   setClickHandler = (callback) => {
-    this._callback.click = callback;
+    this.#callback.set('click', callback);
     this.element.addEventListener('click', this.#clickHandler);
   }
 
   #clickHandler = () => {
-    this._callback.click();
+    this.#callback.get('click')();
   }
 }
