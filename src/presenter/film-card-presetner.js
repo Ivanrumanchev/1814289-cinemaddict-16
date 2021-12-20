@@ -21,6 +21,7 @@ export default class FilmCardPresenter {
 
   #cardComponent = null;
   #mode = Mode.DEFAULT
+  #scrollPopupY = 0;
 
   #popupComponent = null;
   #popupFilmDetailsComponent = null;
@@ -54,6 +55,8 @@ export default class FilmCardPresenter {
     this.#cardComponent.setMarkAsWatchedClickHandler(this.#handleMarkAsWatchedCardClick);
     this.#cardComponent.setFavoriteClickHandler(this.#handleFavoriteCardClick);
 
+    this.#popupNewCommentComponent.setAddNewCommentHandler(this.#handleAddNewCommentKeydown);
+
     if (prevCardComponent === null) {
       render(this.#filmsListElement, this.#cardComponent, RenderPosition.BEFOREEND);
       return;
@@ -72,8 +75,14 @@ export default class FilmCardPresenter {
 
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#scrollPopupY = this.#popupComponent.element.scrollTop;
       this.#handleClosePopupClick();
     }
+  }
+
+  #renderPopupNewComment = (container) => {
+    render(container, this.#popupNewCommentComponent, RenderPosition.AFTEREND);
+    this.#popupNewCommentComponent.restoreHandlers();
   }
 
   #closeButtonClickHandler = () => {
@@ -89,7 +98,7 @@ export default class FilmCardPresenter {
     const filmDetails = this.#popupComponent.element.querySelector('.film-details__inner');
     const commentsList = this.#popupCommentsListComponent.element.querySelector('.film-details__comments-list');
     this.#popupCommentComponents.forEach((component) => render(commentsList, component, RenderPosition.BEFOREEND));
-    render(commentsList, this.#popupNewCommentComponent, RenderPosition.AFTEREND);
+    this.#renderPopupNewComment(commentsList);
     render(filmDetails, this.#popupCommentsListComponent, RenderPosition.BEFOREEND);
     render(filmDetails, this.#popupFilmDetailsComponent, RenderPosition.AFTERBEGIN);
     render(document.body, this.#popupComponent, RenderPosition.BEFOREEND);
@@ -117,13 +126,21 @@ export default class FilmCardPresenter {
 
   #handleClosePopupClick = () => {
     this.#closeButtonClickHandler();
+    this.#popupNewCommentComponent.resetData();
+    this.#popupNewCommentComponent.newCommentKeysHandlersRemove();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#mode = Mode.DEFAULT;
   }
 
-  #createNewCardChanged = (property) => {
+  #createNewCardUserDetailsChanged = (property) => {
     const newCard = getDeepCopy(this.#card);
     newCard.userDetails[property] = !newCard.userDetails[property];
+    return newCard;
+  }
+
+  #createNewCardCommentsChanged = (comment) => {
+    const newCard = getDeepCopy(this.#card);
+    newCard.comments.push(comment);
     return newCard;
   }
 
@@ -133,7 +150,7 @@ export default class FilmCardPresenter {
       this.#handleAddToWatchListPopupClick();
       return;
     }
-    this.#changeData( this.#createNewCardChanged('watchList') );
+    this.#changeData( this.#createNewCardUserDetailsChanged('watchList') );
   }
 
   #handleMarkAsWatchedCardClick = () => {
@@ -142,7 +159,7 @@ export default class FilmCardPresenter {
       this.#handleMarkAsWatchedPopupClick();
       return;
     }
-    this.#changeData( this.#createNewCardChanged('alreadyWatched') );
+    this.#changeData( this.#createNewCardUserDetailsChanged('alreadyWatched') );
   }
 
   #handleFavoriteCardClick = () => {
@@ -151,24 +168,34 @@ export default class FilmCardPresenter {
       this.#handleFavoritePopupClick();
       return;
     }
-    this.#changeData( this.#createNewCardChanged('favorite') );
+    this.#changeData( this.#createNewCardUserDetailsChanged('favorite') );
   }
 
   #handleAddToWatchListPopupClick = () => {
     this.resetView();
-    this.#changeData( this.#createNewCardChanged('watchList') );
+    this.#changeData( this.#createNewCardUserDetailsChanged('watchList') );
     this.#handleOpenPopupClick();
+    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
   }
 
   #handleMarkAsWatchedPopupClick = () => {
     this.resetView();
-    this.#changeData( this.#createNewCardChanged('alreadyWatched') );
+    this.#changeData( this.#createNewCardUserDetailsChanged('alreadyWatched') );
     this.#handleOpenPopupClick();
+    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
   }
 
   #handleFavoritePopupClick = () => {
     this.resetView();
-    this.#changeData( this.#createNewCardChanged('favorite') );
+    this.#changeData( this.#createNewCardUserDetailsChanged('favorite') );
     this.#handleOpenPopupClick();
+    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
+  }
+
+  #handleAddNewCommentKeydown = (newComment) => {
+    this.resetView();
+    this.#changeData( this.#createNewCardCommentsChanged(newComment) );
+    this.#handleOpenPopupClick();
+    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
   }
 }

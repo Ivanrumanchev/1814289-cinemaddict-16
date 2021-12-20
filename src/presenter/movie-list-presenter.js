@@ -220,6 +220,7 @@ export default class MovieListPresenter {
     }
 
     this.#sortCards(sortType);
+    this.#handleModeChange();
     this.#clearFilmsLists();
     this.#renderFilmsLists();
   }
