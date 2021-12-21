@@ -58,3 +58,25 @@ export const getDeepCopy = (inObject) => {
 export const sortCardDate = (cardA, cardB) => dayjs(cardB.filmInfo.release.date).diff(dayjs(cardA.filmInfo.release.date));
 export const sortCardRating = (cardA, cardB) => cardB.filmInfo.totalRating - cardA.filmInfo.totalRating;
 export const sortCardComments = (cardA, cardB) => cardB.comments.length - cardA.comments.length;
+
+export const runOnKeys = (func, ...codes) => {
+  const pressed = new Set();
+
+  document.addEventListener('keydown', (evt) => {
+    pressed.add(evt.code);
+
+    for (const code of codes) {
+      if (!pressed.has(code)) {
+        return;
+      }
+    }
+
+    pressed.clear();
+
+    func();
+  });
+
+  document.addEventListener('keyup', (evt) => {
+    pressed.delete(evt.code);
+  });
+};
