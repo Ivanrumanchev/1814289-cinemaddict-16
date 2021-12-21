@@ -1,7 +1,5 @@
-// import AbstractView from './abstract-view.js';
 import SmartView from './smart-view.js';
 import {RenderPosition, render} from '../utils/render.js';
-// import {runOnKeys} from '../utils/common.js';
 
 const NewEmojiSize = {
   WIDTH: 55,
