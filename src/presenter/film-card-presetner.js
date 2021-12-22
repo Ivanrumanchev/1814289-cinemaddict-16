@@ -97,7 +97,10 @@ export default class FilmCardPresenter {
   #filmCardClickHandler = () => {
     const filmDetails = this.#popupComponent.element.querySelector('.film-details__inner');
     const commentsList = this.#popupCommentsListComponent.element.querySelector('.film-details__comments-list');
-    this.#popupCommentComponents.forEach((component) => render(commentsList, component, RenderPosition.BEFOREEND));
+    this.#popupCommentComponents.forEach((component) => {
+      render(commentsList, component, RenderPosition.BEFOREEND);
+      component.setDeleteButtonClickHandler(this.#handleDeleteCommentClick);
+    });
     this.#renderPopupNewComment(commentsList);
     render(filmDetails, this.#popupCommentsListComponent, RenderPosition.BEFOREEND);
     render(filmDetails, this.#popupFilmDetailsComponent, RenderPosition.AFTERBEGIN);
@@ -141,6 +144,12 @@ export default class FilmCardPresenter {
   #createNewCardCommentsChanged = (comment) => {
     const newCard = getDeepCopy(this.#card);
     newCard.comments.push(comment);
+    return newCard;
+  }
+
+  #createNewCardWithoutDeletedComment = (index) => {
+    const newCard = getDeepCopy(this.#card);
+    newCard.comments.splice(index, 1);
     return newCard;
   }
 
@@ -194,7 +203,15 @@ export default class FilmCardPresenter {
 
   #handleAddNewCommentKeydown = (newComment) => {
     this.resetView();
-    this.#changeData( this.#createNewCardCommentsChanged(newComment) );
+    this.#changeData( this.#createNewCardCommentsChanged(newComment), true );
+    this.#handleOpenPopupClick();
+    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
+  }
+
+  #handleDeleteCommentClick = (commentId) => {
+    const indexDeletedComment = this.#card.comments.findIndex(({id}) => id === commentId);
+    this.resetView();
+    this.#changeData( this.#createNewCardWithoutDeletedComment(indexDeletedComment), true );
     this.#handleOpenPopupClick();
     this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
   }

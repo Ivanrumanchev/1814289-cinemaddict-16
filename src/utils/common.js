@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+dayjs.extend(relativeTime);
 
 const MINUTES_IN_HOUR = 60;
 
@@ -10,7 +12,7 @@ export const getTimeFromMins = (mins) => {
 
 export const getYearFormatDate = (date) => dayjs(date).format('YYYY');
 export const getDayFormatDate = (date) => dayjs(date).format('D MMMM YYYY');
-export const getFullFormatDate = (date) => dayjs(date).format('YYYY/MM/DD HH:mm');
+export const getHumanFormatDate = (date) => dayjs(date).fromNow();
 
 // for Generator
 export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toString();
@@ -58,25 +60,3 @@ export const getDeepCopy = (inObject) => {
 export const sortCardDate = (cardA, cardB) => dayjs(cardB.filmInfo.release.date).diff(dayjs(cardA.filmInfo.release.date));
 export const sortCardRating = (cardA, cardB) => cardB.filmInfo.totalRating - cardA.filmInfo.totalRating;
 export const sortCardComments = (cardA, cardB) => cardB.comments.length - cardA.comments.length;
-
-export const runOnKeys = (func, ...codes) => {
-  const pressed = new Set();
-
-  document.addEventListener('keydown', (evt) => {
-    pressed.add(evt.code);
-
-    for (const code of codes) {
-      if (!pressed.has(code)) {
-        return;
-      }
-    }
-
-    pressed.clear();
-
-    func();
-  });
-
-  document.addEventListener('keyup', (evt) => {
-    pressed.delete(evt.code);
-  });
-};

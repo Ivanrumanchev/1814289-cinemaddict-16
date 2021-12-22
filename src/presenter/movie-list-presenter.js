@@ -120,11 +120,17 @@ export default class MovieListPresenter {
   }
 
   #renderFilmsListTopRated = () => {
+    if (this.#extraFilmCards.every( ({filmInfo}) => filmInfo.totalRating === 0 )) {
+      return;
+    }
     this.#renderFilmCardsTopRated(this.#filmsListTopRatedComponent, this.#extraFilmCards.sort(sortCardRating));
     render(this.#filmsContainerComponent, this.#filmsListTopRatedComponent, RenderPosition.BEFOREEND);
   }
 
   #renderFilmsListMostCommented = () => {
+    if (this.#extraFilmCards.every( ({comments}) => comments.length === 0 )) {
+      return;
+    }
     this.#renderFilmCardsMostCommented(this.#filmsListMostCommentedComponent, this.#extraFilmCards.sort(sortCardComments));
     render(this.#filmsContainerComponent, this.#filmsListMostCommentedComponent, RenderPosition.BEFOREEND);
   }
@@ -189,13 +195,20 @@ export default class MovieListPresenter {
     }
   }
 
-  #handleCardChange = (updatedCard) => {
+  #handleCardChange = (updatedCard, isCommentChange = false) => {
     const filmCardPresenter = this.#filmCardPresenters.get(updatedCard.id);
     const filmCardTopRatedPresenter = this.#filmCardTopRatedPresenters.get(updatedCard.id);
     const filmCardMostCommentedPresenter = this.#filmCardMostCommentedPresenters.get(updatedCard.id);
 
     this.#filmCards = updateItem(this.#filmCards, updatedCard);
     this.#sourcedFilmCards = updateItem(this.#sourcedFilmCards, updatedCard);
+    this.#extraFilmCards = updateItem(this.#filmCards, updatedCard);
+
+    if (isCommentChange) {
+      this.#extraFilmCards.sort(sortCardComments);
+      this.#clearFilmsListMostCommented();
+      this.#renderFilmsListMostCommented();
+    }
 
     if (filmCardPresenter !== undefined) {
       filmCardPresenter.init(updatedCard);
