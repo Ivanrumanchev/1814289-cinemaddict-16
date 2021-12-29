@@ -8,16 +8,19 @@ import PopupNewCommentView from '../view/popup-new-comment-view.js';
 
 import {RenderPosition, render, remove, replace} from '../utils/render.js';
 import {getDeepCopy} from '../utils/common.js';
+import {UserAction, UpdateType, Mode} from '../const.js';
 
-const Mode = {
-  DEFAULT: 'DEFAULT',
-  OPENING: 'OPENING',
+const NewCardType = {
+  USER_DETAILS: 'USER_DETAILS',
+  NEW_COMMENT: 'NEW_COMMENT',
+  DELETE_COMMENT: 'DELETE_COMMENT',
 };
 
 export default class FilmCardPresenter {
-  #filmsListElement = null;
+  #filmCardsContainerElement = null;
   #changeData = null;
-  #changeMode = null;
+  #changeModeOpen = null;
+  #changeModeClose = null;
 
   #cardComponent = null;
   #mode = Mode.DEFAULT
@@ -31,10 +34,11 @@ export default class FilmCardPresenter {
 
   #card = null;
 
-  constructor(filmsListElement, changeData, changeMode) {
-    this.#filmsListElement = filmsListElement;
+  constructor(filmCardsContainerElement, changeData, changeModeOpen, changeModeClose) {
+    this.#filmCardsContainerElement = filmCardsContainerElement;
     this.#changeData = changeData;
-    this.#changeMode = changeMode;
+    this.#changeModeOpen = changeModeOpen;
+    this.#changeModeClose = changeModeClose;
   }
 
   init = (card) => {
@@ -50,7 +54,7 @@ export default class FilmCardPresenter {
     this.#popupCommentComponents = card.comments.map((comment) => new PopupCommentView(comment));
     this.#popupNewCommentComponent = new PopupNewCommentView();
 
-    this.#cardComponent.setOpenPopupClickHandler(this.#handleOpenPopupClick);
+    this.#cardComponent.setOpenPopupClickHandler(this.handleOpenPopupClick);
     this.#cardComponent.setAddToWatchListClickHandler(this.#handleAddToWatchListCardClick);
     this.#cardComponent.setMarkAsWatchedClickHandler(this.#handleMarkAsWatchedCardClick);
     this.#cardComponent.setFavoriteClickHandler(this.#handleFavoriteCardClick);
@@ -58,11 +62,11 @@ export default class FilmCardPresenter {
     this.#popupNewCommentComponent.setAddNewCommentHandler(this.#handleAddNewCommentKeydown);
 
     if (prevCardComponent === null) {
-      render(this.#filmsListElement, this.#cardComponent, RenderPosition.BEFOREEND);
+      render(this.#filmCardsContainerElement, this.#cardComponent, RenderPosition.BEFOREEND);
       return;
     }
 
-    if (this.#filmsListElement.contains(prevCardComponent.element)) {
+    if (this.#filmCardsContainerElement.contains(prevCardComponent.element)) {
       replace(this.#cardComponent, prevCardComponent);
     }
 
@@ -78,6 +82,27 @@ export default class FilmCardPresenter {
       this.#scrollPopupY = this.#popupComponent.element.scrollTop;
       this.#handleClosePopupClick();
     }
+  }
+
+  scrollPopup = (scrollY) => {
+    this.#popupComponent.element.scrollTo(0, scrollY);
+  }
+
+  handleOpenPopupClick = () => {
+    this.#changeModeOpen(this.#card);
+    this.#filmCardClickHandler();
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+    this.#popupFilmDetailsComponent.setClosePopupClickHandler(this.#handleClosePopupClick);
+    this.#mode = Mode.OPENING;
+  }
+
+  #handleClosePopupClick = () => {
+    this.#changeModeClose(this.#scrollPopupY);
+    this.#closeButtonClickHandler();
+    this.#popupNewCommentComponent.resetData();
+    this.#popupNewCommentComponent.newCommentKeysHandlersRemove();
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    this.#mode = Mode.DEFAULT;
   }
 
   #renderPopupNewComment = (container) => {
@@ -119,37 +144,21 @@ export default class FilmCardPresenter {
     }
   }
 
-  #handleOpenPopupClick = () => {
-    this.#changeMode();
-    this.#filmCardClickHandler();
-    document.addEventListener('keydown', this.#escKeyDownHandler);
-    this.#popupFilmDetailsComponent.setClosePopupClickHandler(this.#handleClosePopupClick);
-    this.#mode = Mode.OPENING;
-  }
-
-  #handleClosePopupClick = () => {
-    this.#closeButtonClickHandler();
-    this.#popupNewCommentComponent.resetData();
-    this.#popupNewCommentComponent.newCommentKeysHandlersRemove();
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
-    this.#mode = Mode.DEFAULT;
-  }
-
-  #createNewCardUserDetailsChanged = (property) => {
+  #createNewCard = (updateType, update) => {
     const newCard = getDeepCopy(this.#card);
-    newCard.userDetails[property] = !newCard.userDetails[property];
-    return newCard;
-  }
 
-  #createNewCardCommentsChanged = (comment) => {
-    const newCard = getDeepCopy(this.#card);
-    newCard.comments.push(comment);
-    return newCard;
-  }
+    switch (updateType) {
+      case NewCardType.USER_DETAILS:
+        newCard.userDetails[update] = !newCard.userDetails[update];
+        break;
+      case NewCardType.NEW_COMMENT:
+        newCard.comments.push(update);
+        break;
+      case NewCardType.DELETE_COMMENT:
+        newCard.comments.splice(update, 1);
+        break;
+    }
 
-  #createNewCardWithoutDeletedComment = (index) => {
-    const newCard = getDeepCopy(this.#card);
-    newCard.comments.splice(index, 1);
     return newCard;
   }
 
@@ -159,7 +168,11 @@ export default class FilmCardPresenter {
       this.#handleAddToWatchListPopupClick();
       return;
     }
-    this.#changeData( this.#createNewCardUserDetailsChanged('watchList') );
+    this.#changeData(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR,
+      this.#createNewCard(NewCardType.USER_DETAILS, 'watchList'),
+    );
   }
 
   #handleMarkAsWatchedCardClick = () => {
@@ -168,7 +181,11 @@ export default class FilmCardPresenter {
       this.#handleMarkAsWatchedPopupClick();
       return;
     }
-    this.#changeData( this.#createNewCardUserDetailsChanged('alreadyWatched') );
+    this.#changeData(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR,
+      this.#createNewCard(NewCardType.USER_DETAILS, 'alreadyWatched'),
+    );
   }
 
   #handleFavoriteCardClick = () => {
@@ -177,42 +194,56 @@ export default class FilmCardPresenter {
       this.#handleFavoritePopupClick();
       return;
     }
-    this.#changeData( this.#createNewCardUserDetailsChanged('favorite') );
+    this.#changeData(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR,
+      this.#createNewCard(NewCardType.USER_DETAILS, 'favorite'),
+    );
   }
 
   #handleAddToWatchListPopupClick = () => {
     this.resetView();
-    this.#changeData( this.#createNewCardUserDetailsChanged('watchList') );
-    this.#handleOpenPopupClick();
-    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
+    this.#changeData(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      this.#createNewCard(NewCardType.USER_DETAILS, 'watchList'),
+    );
   }
 
   #handleMarkAsWatchedPopupClick = () => {
     this.resetView();
-    this.#changeData( this.#createNewCardUserDetailsChanged('alreadyWatched') );
-    this.#handleOpenPopupClick();
-    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
+    this.#changeData(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      this.#createNewCard(NewCardType.USER_DETAILS, 'alreadyWatched'),
+    );
   }
 
   #handleFavoritePopupClick = () => {
     this.resetView();
-    this.#changeData( this.#createNewCardUserDetailsChanged('favorite') );
-    this.#handleOpenPopupClick();
-    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
+    this.#changeData(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      this.#createNewCard(NewCardType.USER_DETAILS, 'favorite'),
+    );
   }
 
   #handleAddNewCommentKeydown = (newComment) => {
     this.resetView();
-    this.#changeData( this.#createNewCardCommentsChanged(newComment), true );
-    this.#handleOpenPopupClick();
-    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
+    this.#changeData(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.PATCH,
+      this.#createNewCard(NewCardType.NEW_COMMENT, newComment),
+    );
   }
 
   #handleDeleteCommentClick = (commentId) => {
     const indexDeletedComment = this.#card.comments.findIndex(({id}) => id === commentId);
     this.resetView();
-    this.#changeData( this.#createNewCardWithoutDeletedComment(indexDeletedComment), true );
-    this.#handleOpenPopupClick();
-    this.#popupComponent.element.scrollTo(0, this.#scrollPopupY);
+    this.#changeData(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.PATCH,
+      this.#createNewCard(NewCardType.DELETE_COMMENT, indexDeletedComment),
+    );
   }
 }
