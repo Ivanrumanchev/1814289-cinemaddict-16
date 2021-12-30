@@ -8,7 +8,12 @@ import PopupNewCommentView from '../view/popup-new-comment-view.js';
 
 import {RenderPosition, render, remove, replace} from '../utils/render.js';
 import {getDeepCopy} from '../utils/common.js';
-import {UserAction, UpdateType, Mode} from '../const.js';
+import {UserAction, UpdateType} from '../const.js';
+
+const Mode = {
+  DEFAULT: 'DEFAULT',
+  OPENING: 'OPENING',
+};
 
 const NewCardType = {
   USER_DETAILS: 'USER_DETAILS',

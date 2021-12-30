@@ -6,7 +6,8 @@ import FilmCardPresenter from './film-card-presetner.js';
 import ButtonShowMoreView from '../view/button-show-more-view.js';
 import {RenderPosition, render, remove} from '../utils/render.js';
 import {getDeepCopy, sortCardDate, sortCardRating, sortCardComments} from '../utils/common.js';
-import {SortType, UpdateType, UserAction, Mode} from '../const.js';
+import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
+import {filter} from '../utils/filter.js';
 
 const FILM_COUNT_PER_STEP = 5;
 const FILM_COUNT_EXTRA = 2;
@@ -20,15 +21,16 @@ const FilmsListTitles = {
 export default class MovieListPresenter {
   #movieList = null;
   #moviesModel = null;
+  #filterModel = null;
 
-  #mode = Mode.DEFAULT;
   #openPopupCard = null;
   #scrollPopupY = 0;
 
   #sortComponent = null;
   #showMoreButtonComponent = null;
+  #filmsListEmptyComponent = null;
+
   #filmsContainerComponent = new FilmsContainerView();
-  #filmsListEmptyComponent = new FilmsListEmptyView();
 
   #filmsListCommonComponent = new FilmsListView(FilmsListTitles.COMMON, false);
   #filmsListTopRatedComponent = new FilmsListView(FilmsListTitles.TOP_RATED, true);
@@ -40,23 +42,30 @@ export default class MovieListPresenter {
   #filmCardMostCommentedPresenters = new Map();
 
   #currentSortType = SortType.DEFAULT;
+  #filterType = FilterType.ALL;
 
-  constructor(movieList, moviesModel) {
+  constructor(movieList, moviesModel, filterModel) {
     this.#movieList = movieList;
     this.#moviesModel = moviesModel;
+    this.#filterModel = filterModel;
 
     this.#moviesModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get movies() {
+    this.#filterType = this.#filterModel.filter;
+    const cards = getDeepCopy(this.#moviesModel.movies);
+    const filteredCards = filter[this.#filterType](cards);
+
     switch (this.#currentSortType) {
       case SortType.DATE:
-        return getDeepCopy(this.#moviesModel.movies).sort(sortCardDate);
+        return filteredCards.sort(sortCardDate);
       case SortType.RATING:
-        return getDeepCopy(this.#moviesModel.movies).sort(sortCardRating);
+        return filteredCards.sort(sortCardRating);
     }
 
-    return this.#moviesModel.movies;
+    return filteredCards;
   }
 
   get moviesTopRated() {
@@ -72,9 +81,13 @@ export default class MovieListPresenter {
   }
 
   #renderSort = () => {
+    if (this.movies.length === 0) {
+      return;
+    }
+
     this.#sortComponent = new SortView(this.#currentSortType);
     this.#sortComponent.setSortTypeChangeHandler(this.#handleSortTypeChange);
-    render(this.#movieList, this.#sortComponent, RenderPosition.AFTEREND);
+    render(this.#filmsContainerComponent, this.#sortComponent, RenderPosition.BEFOREBEGIN);
   }
 
   #renderFilmCard = (card) => {
@@ -111,6 +124,7 @@ export default class MovieListPresenter {
   }
 
   #renderFilmsListEmpty = () => {
+    this.#filmsListEmptyComponent = new FilmsListEmptyView(this.#filterType);
     render(this.#filmsContainerComponent, this.#filmsListEmptyComponent, RenderPosition.BEFOREEND);
   }
 
@@ -173,15 +187,16 @@ export default class MovieListPresenter {
     this.#clearFilmsLists();
 
     remove(this.#sortComponent);
-    remove(this.#filmsListEmptyComponent);
+
     remove(this.#showMoreButtonComponent);
+
+    if (this.#filmsListEmptyComponent) {
+      remove(this.#filmsListEmptyComponent);
+    }
 
     if (resetRenderedCardCount) {
       this.#renderedCardCount = FILM_COUNT_PER_STEP;
     } else {
-      // На случай, если перерисовка доски вызвана
-      // уменьшением количества задач (например, удаление или перенос в архив)
-      // нужно скорректировать число показанных задач
       this.#renderedCardCount = Math.min(cardsCount, this.#renderedCardCount);
     }
 
@@ -217,7 +232,7 @@ export default class MovieListPresenter {
   }
 
   #renderFilmsContainer = () => {
-    render(this.#movieList, this.#filmsContainerComponent, RenderPosition.AFTEREND);
+    render(this.#movieList, this.#filmsContainerComponent, RenderPosition.BEFOREEND);
     this.#renderBoard();
   }
 
@@ -273,50 +288,27 @@ export default class MovieListPresenter {
       case UserAction.UPDATE_MOVIE:
         this.#moviesModel.updateMovie(updateType, update);
         break;
-      // case UserAction.WATCHLIST:
-      //   this.#moviesModel.updateWatchList(updateType, update);
-      //   break;
-      // case UserAction.HISTORY:
-      //   this.#moviesModel.updateHistory(updateType, update);
-      //   break;
-      // case UserAction.FAVORITES:
-      //   this.#moviesModel.updateFavorites(updateType, update);
-      //   break;
-      // case UserAction.UPDATE_COMMENTS:
-      //   this.#moviesModel.updateComments(updateType, update);
-      //   break;
-          // case UserAction.ADD_COMMENT:
-          //   this.#moviesModel.updateComments(updateType, update);
-          //   break;
     }
-    // Здесь будем вызывать обновление модели.
-    // actionType - действие пользователя, нужно чтобы понять, какой метод модели вызвать
-    // updateType - тип изменений, нужно чтобы понять, что после нужно обновить
-    // update - обновленные данные
   }
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        // - обновить карточку, пересортировать MostComments и открыть попап при добавлении или удалении комментария
         this.#handleCardChange(data);
         this.#clearFilmsListMostCommented();
         this.#renderFilmsListMostCommented();
         this.#handleOpenPopup(this.#openPopupCard);
         break;
       case UpdateType.MINOR:
-        // - обновить список карточек при закрытом попапе
         this.#clearBoard();
         this.#renderBoard();
         break;
       case UpdateType.MINOR_POPUP:
-        // - обновить список карточек и открыть попап
         this.#clearBoard();
         this.#renderBoard();
         this.#handleOpenPopup(this.#openPopupCard);
         break;
       case UpdateType.MAJOR:
-        // - обновить всю доску (например, при переключении фильтра)
         this.#clearBoard({resetRenderedCardCount: true, resetSortType: true});
         this.#renderBoard();
         break;
@@ -327,13 +319,11 @@ export default class MovieListPresenter {
     this.#filmCardPresenters.forEach((presenter) => presenter.resetView());
     this.#filmCardTopRatedPresenters.forEach((presenter) => presenter.resetView());
     this.#filmCardMostCommentedPresenters.forEach((presenter) => presenter.resetView());
-    this.#mode = Mode.OPENING;
     this.#openPopupCard = card;
   }
 
   #handleCloseModeChange = (scroll) => {
     this.#scrollPopupY = scroll;
-    this.#mode = Mode.DEFAULT;
   }
 
   #handleSortTypeChange = (sortType) => {

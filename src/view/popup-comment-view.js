@@ -1,5 +1,6 @@
 import {getHumanFormatDate} from '../utils/common.js';
 import AbstractView from './abstract-view.js';
+import he from 'he';
 
 const createCommentTemplate = ({author, comment, date, emotion}) => (
   `<li class="film-details__comment">
@@ -7,7 +8,7 @@ const createCommentTemplate = ({author, comment, date, emotion}) => (
     <img src="./images/emoji/${ emotion }.png" width="55" height="55" alt="emoji-smile">
   </span>
   <div>
-    <p class="film-details__comment-text">${ comment }</p>
+    <p class="film-details__comment-text">${ he.encode(comment) }</p>
     <p class="film-details__comment-info">
       <span class="film-details__comment-author">${ author }</span>
       <span class="film-details__comment-day">${ getHumanFormatDate(date) }</span>

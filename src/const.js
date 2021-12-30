@@ -6,10 +6,6 @@ export const SortType = {
 
 export const UserAction = {
   UPDATE_MOVIE: 'UPDATE_MOVIE',
-  WATCHLIST: 'WATCHLIST',
-  HISTORY: 'HISTORY',
-  FAVORITES: 'FAVORITES',
-  UPDATE_COMMENTS: 'UPDATE_COMMENTS',
 };
 
 export const UpdateType = {
@@ -18,7 +14,9 @@ export const UpdateType = {
   MAJOR: 'MAJOR',
 };
 
-export const Mode = {
-  DEFAULT: 'DEFAULT',
-  OPENING: 'OPENING',
+export const FilterType = {
+  ALL: 'all',
+  WATCHLIST: 'watchlist',
+  HISTORY: 'history',
+  FAVORITES: 'favorites',
 };

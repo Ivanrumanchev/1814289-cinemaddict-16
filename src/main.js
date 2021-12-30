@@ -3,16 +3,16 @@ import {RenderPosition, render} from './utils/render.js';
 import RankView from './view/rank-view.js';
 import QuantityFilmsView from './view/quantity-films-view.js';
 
-import FiltersView from './view/filters-view.js';
+import FilterPresenter from './presenter/filter-presenter.js';
 
 import MovieListPresenter from './presenter/movie-list-presenter.js';
 
 import MoviesModel from './model/movies-model.js';
+import FilterModel from './model/filter-model.js';
 
 import {generateMovie} from './mock/movie.js';
-import {generateFilter} from './mock/filter.js';
 
-const FILM_COUNT = 5;
+const FILM_COUNT = 23;
 
 const siteMainElement = document.querySelector('.main');
 const siteHeaderElement = document.querySelector('.header');
@@ -20,10 +20,11 @@ const siteFooterElement = document.querySelector('.footer');
 const footerStatisticsElement = siteFooterElement.querySelector('.footer__statistics');
 
 const cards = Array.from( {length: FILM_COUNT}, generateMovie );
-const filters = generateFilter(cards);
 
 const moviesModel = new MoviesModel();
 moviesModel.movies = cards;
+
+const filterModel = new FilterModel();
 
 // Звание и кол-во фильмов в сервисе
 
@@ -32,10 +33,10 @@ render(footerStatisticsElement, new QuantityFilmsView(cards), RenderPosition.AFT
 
 // Фильтры
 
-render(siteMainElement, new FiltersView(filters), RenderPosition.AFTERBEGIN);
-const navigationElement = siteMainElement.querySelector('.main-navigation');
+const filterPresenter = new FilterPresenter(siteMainElement, filterModel, moviesModel);
+filterPresenter.init();
 
 // Сортировка и фильмы
 
-const movieListPresenter = new MovieListPresenter(navigationElement, moviesModel);
+const movieListPresenter = new MovieListPresenter(siteMainElement, moviesModel, filterModel);
 movieListPresenter.init();

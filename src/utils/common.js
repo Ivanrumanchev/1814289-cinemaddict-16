@@ -18,14 +18,6 @@ export const getHumanFormatDate = (date) => dayjs(date).fromNow();
 export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toString();
 export const getRandomMinuteDate = (minutesGap) => dayjs().subtract(minutesGap, 'minute').toString();
 
-export const capitalizeFirstLetter = (str) => {
-  if (!str) {
-    return str;
-  }
-
-  return (str[0].toUpperCase() + str.slice(1));
-};
-
 export const getDeepCopy = (inObject) => {
   if (typeof inObject !== 'object' || inObject === null) {
     return inObject;

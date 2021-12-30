@@ -11,7 +11,6 @@ const createSortTemplate = (currentSortType) => (
 
 export default class SortView extends AbstractView {
   #callback = new Map();
-  // #allButtons = this.element.querySelectorAll('.sort__button');
 
   #currentSortType = null;
 
@@ -36,9 +35,5 @@ export default class SortView extends AbstractView {
 
     evt.preventDefault();
     this.#callback.get('sortTypeChange')(evt.target.dataset.sortType);
-    // for (const button of this.#allButtons) {
-    //   button.classList.remove('sort__button--active');
-    // }
-    // evt.target.classList.add('sort__button--active');
   }
 }

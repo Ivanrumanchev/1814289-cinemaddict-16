@@ -1,30 +1,67 @@
-import {capitalizeFirstLetter} from '../utils/common.js';
 import AbstractView from './abstract-view.js';
 
-const createFilterItemTemplate = (filter) => {
-  const {name, count} = filter;
-  return `<a href="#${ name }" class="main-navigation__item">${ capitalizeFirstLetter(name) } <span class="main-navigation__item-count">${ count }</span></a>`;
+const createFilterItemTemplate = (filter, currentFilterType) => {
+  const {type, name, count} = filter;
+  return (
+    `<a
+    href="#${ type }"
+    class="main-navigation__item ${type === currentFilterType ? 'main-navigation__item--active' : ''}">
+    ${name}
+    ${count ? `<span
+    class="main-navigation__item-count">${ count }
+    </span>` : ''}
+    </a>`
+  );
 };
 
-const createFiltersTemplate = (filters) => (
-  `<nav class="main-navigation">
+const createFiltersTemplate = (filterItems, currentFilterType) => {
+  const filterItemsTemplate = filterItems
+    .map((filter) => createFilterItemTemplate(filter, currentFilterType))
+    .join('');
+
+  return `<nav class="main-navigation">
     <div class="main-navigation__items">
-      <a href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>
-      ${ filters.map((filter) => createFilterItemTemplate(filter)).join('') }
+
+      ${filterItemsTemplate}
     </div>
     <a href="#stats" class="main-navigation__additional">Stats</a>
-  </nav>`
-);
+  </nav>`;
+};
 
 export default class FiltersView extends AbstractView {
   #filters = null;
+  #callback = new Map();
+  #currentFilter = null;
 
-  constructor (filters) {
+  constructor (filters, currentFilterType) {
     super();
     this.#filters = filters;
+    this.#currentFilter = currentFilterType;
   }
 
   get template() {
-    return createFiltersTemplate(this.#filters);
+    return createFiltersTemplate(this.#filters, this.#currentFilter);
+  }
+
+  setFilterTypeChangeHandler = (callback) => {
+    const navigationElement = this.element.querySelector('.main-navigation__items');
+    this.#callback.set('filterTypeChange', callback);
+    navigationElement.addEventListener('click', this.#filterTypeChangeHandler);
+  }
+
+  #filterTypeChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    const navigationItemElement = evt.target.closest('a.main-navigation__item');
+
+    if (!navigationItemElement) {
+      return;
+    }
+
+    const href = navigationItemElement.getAttribute('href')?.slice?.(1);
+
+    if (href?.length) {
+      this.#callback.get('filterTypeChange')(href);
+    }
   }
 }
