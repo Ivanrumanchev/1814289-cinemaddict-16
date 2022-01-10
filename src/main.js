@@ -4,7 +4,7 @@ import QuantityFilmsView from './view/quantity-films-view.js';
 
 import RankPresenter from './presenter/rank-presenter.js';
 import FilterPresenter from './presenter/filter-presenter.js';
-import MovieListPresenter from './presenter/movie-list-presenter.js';
+import MoviesListPresenter from './presenter/movies-list-presenter.js';
 
 import MoviesModel from './model/movies-model.js';
 import FilterModel from './model/filter-model.js';
@@ -33,5 +33,5 @@ rankPresenter.init();
 const filterPresenter = new FilterPresenter(siteMainElement, filterModel, moviesModel);
 filterPresenter.init();
 
-const movieListPresenter = new MovieListPresenter(siteMainElement, moviesModel, filterModel);
-movieListPresenter.init();
+const moviesListPresenter = new MoviesListPresenter(siteMainElement, moviesModel, filterModel);
+moviesListPresenter.init();

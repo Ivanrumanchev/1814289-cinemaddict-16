@@ -2,7 +2,7 @@ import FilmsContainerView from '../view/films-container-view.js';
 import SortView from '../view/sort-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsListEmptyView from '../view/films-list-empty-view.js';
-import FilmCardPresenter from './film-card-presetner.js';
+import FilmCardPresenter from './film-card-presenter.js';
 import ButtonShowMoreView from '../view/button-show-more-view.js';
 import {RenderPosition, render, remove} from '../utils/render.js';
 import {getDeepCopy, sortCardDate, sortCardRating, sortCardComments} from '../utils/common.js';
@@ -18,7 +18,7 @@ const FilmsListTitles = {
   MOST_COMMENTED: 'Most commented',
 };
 
-export default class MovieListPresenter {
+export default class MoviesListPresenter {
   #movieList = null;
   #moviesModel = null;
   #filterModel = null;
