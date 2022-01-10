@@ -45,7 +45,6 @@ const createNewCommentTemplate = () => (
 
 export default class PopupNewCommentView extends SmartView {
   #pressed = new Set();
-  #callback = new Map();
 
   constructor() {
     super();
@@ -68,7 +67,7 @@ export default class PopupNewCommentView extends SmartView {
   }
 
   setAddNewCommentHandler = (callback) => {
-    this.#callback.set('AddNewCommentClick', callback);
+    this._callbacks.set('AddNewCommentClick', callback);
   }
 
   newCommentKeysHandlersRemove = () => {
@@ -90,7 +89,7 @@ export default class PopupNewCommentView extends SmartView {
     }
     this.#pressed.clear();
 
-    this.#callback.get('AddNewCommentClick')(this._data);
+    this._callbacks.get('AddNewCommentClick')(this._data);
   }
 
   #keyUpHandler = (evt) => {

@@ -1,10 +1,9 @@
 import {RenderPosition, render} from './utils/render.js';
 
-import RankView from './view/rank-view.js';
 import QuantityFilmsView from './view/quantity-films-view.js';
 
+import RankPresenter from './presenter/rank-presenter.js';
 import FilterPresenter from './presenter/filter-presenter.js';
-
 import MovieListPresenter from './presenter/movie-list-presenter.js';
 
 import MoviesModel from './model/movies-model.js';
@@ -26,17 +25,13 @@ moviesModel.movies = cards;
 
 const filterModel = new FilterModel();
 
-// Звание и кол-во фильмов в сервисе
-
-render(siteHeaderElement, new RankView(cards), RenderPosition.BEFOREEND);
 render(footerStatisticsElement, new QuantityFilmsView(cards), RenderPosition.AFTERBEGIN);
 
-// Фильтры
+const rankPresenter = new RankPresenter(siteHeaderElement, moviesModel);
+rankPresenter.init();
 
 const filterPresenter = new FilterPresenter(siteMainElement, filterModel, moviesModel);
 filterPresenter.init();
-
-// Сортировка и фильмы
 
 const movieListPresenter = new MovieListPresenter(siteMainElement, moviesModel, filterModel);
 movieListPresenter.init();

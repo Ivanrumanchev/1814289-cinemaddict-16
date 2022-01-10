@@ -1,5 +1,5 @@
 import AbstractObservable from '../utils/abstract-observable.js';
-import {FilterType} from '../const.js';
+import {FilterType, UpdateType} from '../const.js';
 
 export default class FilterModel extends AbstractObservable {
   #filter = FilterType.ALL;
@@ -8,8 +8,8 @@ export default class FilterModel extends AbstractObservable {
     return this.#filter;
   }
 
-  setFilter = (updateType, filter) => {
+  set filter(filter) {
     this.#filter = filter;
-    this._notify(updateType, filter);
+    this._notify(UpdateType.MAJOR, filter);
   }
 }

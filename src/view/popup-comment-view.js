@@ -19,7 +19,6 @@ const createCommentTemplate = ({author, comment, date, emotion}) => (
 
 export default class PopupCommentView extends AbstractView {
   #comment = null;
-  #callback = new Map();
 
   constructor (comment) {
     super();
@@ -31,7 +30,7 @@ export default class PopupCommentView extends AbstractView {
   }
 
   setDeleteButtonClickHandler = (callback) => {
-    this.#callback.set('AddNewCommentClick', callback);
+    this._callbacks.set('AddNewCommentClick', callback);
 
     const deleteButton = this.element.querySelector('.film-details__comment-delete');
     deleteButton.addEventListener('click', this.#deleteButtonClickHandler);
@@ -39,6 +38,6 @@ export default class PopupCommentView extends AbstractView {
 
   #deleteButtonClickHandler = (evt) => {
     evt.preventDefault();
-    this.#callback.get('AddNewCommentClick')(this.#comment.id);
+    this._callbacks.get('AddNewCommentClick')(this.#comment.id);
   }
 }
