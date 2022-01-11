@@ -120,6 +120,12 @@ const generateDateRelease = () => {
   return getRandomDayDate(daysGap);
 };
 
+const generateWatchingDate = () => {
+  const daysGap = getRandomInteger(0, RUNTUME_MAX);
+
+  return getRandomDayDate(daysGap);
+};
+
 const generateId = () => {
   let id = 0;
   return () => id++;
@@ -158,7 +164,7 @@ export const generateMovie = () => ({
   userDetails: {
     watchList: Boolean(getRandomInteger()),
     alreadyWatched: Boolean(getRandomInteger()),
-    watchingDate: generateDateRelease(),
+    watchingDate: generateWatchingDate(),
     favorite: Boolean(getRandomInteger())
   }
 });

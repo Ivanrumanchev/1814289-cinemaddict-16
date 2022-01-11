@@ -24,7 +24,7 @@ const createFiltersTemplate = (filterItems, currentFilterType) => {
 
       ${filterItemsTemplate}
     </div>
-    <a href="#stats" class="main-navigation__additional">Stats</a>
+    <a href="#stats" class="main-navigation__additional${currentFilterType === 'stats' ? ' main-navigation__additional--active' : '' }">Stats</a>
   </nav>`;
 };
 
@@ -61,6 +61,22 @@ export default class FiltersView extends AbstractView {
 
     if (href?.length) {
       this._callbacks.get('filterTypeChange')(href);
+    }
+  }
+
+  setStatisticsChangeHandler = (callback) => {
+    const statisticsElement = this.element.querySelector('.main-navigation__additional');
+    this._callbacks.set('statisticsChange', callback);
+    statisticsElement.addEventListener('click', this.#statisticsChangeHandler);
+  }
+
+  #statisticsChangeHandler = (evt) => {
+    evt.preventDefault();
+
+    const href = evt.target.getAttribute('href')?.slice?.(1);
+
+    if (href?.length) {
+      this._callbacks.get('statisticsChange')(href);
     }
   }
 }

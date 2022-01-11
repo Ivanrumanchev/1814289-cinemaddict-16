@@ -1,4 +1,104 @@
-import AbstractView from './abstract-view.js';
+import SmartView from './smart-view.js';
+import Chart from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import {DateFrom, isAfterDate} from '../utils/common.js';
+
+const BAR_HEIGHT = 50;
+
+const DateRangeName = {
+  ALL_TIME: 'all-time',
+  TODAY: 'today',
+  WEEK: 'week',
+  MONTH: 'month',
+  YEAR: 'year',
+};
+
+const countCardsInDateRange = (uniqueGenres, cards, dateFrom, isAllTime) => {
+  let cardsInDate = cards;
+
+  if (!isAllTime) {
+    cardsInDate = cards.filter( (card) => isAfterDate(card.userDetails.watchingDate, dateFrom) );
+  }
+
+  return uniqueGenres.map((genre) =>
+    cardsInDate
+      .filter( (card) => card.filmInfo.genre?.some( (element) => element === genre ) )
+      .length
+  );
+};
+
+const renderGenresChart = (genresCtx, cards, dateFrom, isAllTime) => {
+  let uniqueGenres = new Set();
+
+  cards?.forEach( (card) =>
+    card.filmInfo.genre?.forEach( (genre) =>
+      uniqueGenres.add(genre) ) );
+
+  genresCtx.height = BAR_HEIGHT * uniqueGenres.size;
+
+  uniqueGenres = Array.from(uniqueGenres);
+
+  const cardsInDateRangeCounts = countCardsInDateRange(uniqueGenres, cards, dateFrom, isAllTime);
+
+  return new Chart(genresCtx, {
+    plugins: [ChartDataLabels],
+    type: 'horizontalBar',
+    data: {
+      labels: uniqueGenres,
+      datasets: [{
+        data: cardsInDateRangeCounts,
+        backgroundColor: '#ffe800',
+        hoverBackgroundColor: '#ffe800',
+        anchor: 'start',
+        barThickness: 24,
+      }],
+    },
+    options: {
+      responsive: false,
+      plugins: {
+        datalabels: {
+          font: {
+            size: 20,
+          },
+          color: '#ffffff',
+          anchor: 'start',
+          align: 'start',
+          offset: 40,
+        },
+      },
+      scales: {
+        yAxes: [{
+          ticks: {
+            fontColor: '#ffffff',
+            padding: 100,
+            fontSize: 20,
+          },
+          gridLines: {
+            display: false,
+            drawBorder: false,
+          },
+        }],
+        xAxes: [{
+          ticks: {
+            display: false,
+            beginAtZero: true,
+          },
+          gridLines: {
+            display: false,
+            drawBorder: false,
+          },
+        }],
+      },
+      legend: {
+        display: false,
+      },
+      tooltips: {
+        enabled: false,
+      },
+    },
+  });
+};
 
 const createStatisticsTemplate = () => (
   `<section class="statistic">
@@ -42,9 +142,6 @@ const createStatisticsTemplate = () => (
       </li>
     </ul>
 
-    <!-- Пример диаграммы -->
-    <img src="images/cinemaddict-stats-markup.png" alt="Пример диаграммы">
-
     <div class="statistic__chart-wrap">
       <canvas class="statistic__chart" width="1000"></canvas>
     </div>
@@ -52,8 +149,88 @@ const createStatisticsTemplate = () => (
   </section>`
 );
 
-export default class StatisticsView extends AbstractView {
+export default class StatisticsView extends SmartView {
+  #dateItem = null;
+
+  constructor(cards) {
+    super();
+
+    this._data = {
+      cards,
+      dateFrom: DateFrom.TODAY,
+      isAllTime: true,
+    };
+
+    this.#setCharts();
+    this.#setDateRange();
+
+    this.#dateItem = DateRangeName.ALL_TIME;
+  }
+
   get template() {
     return createStatisticsTemplate();
+  }
+
+  restoreHandlers = () => {
+    this.#setCharts();
+    this.#setDateRange();
+    this.#setDateItem();
+  }
+
+  #setDateItem = () => {
+    const item = this.element.querySelector(`[value=${this.#dateItem}]`);
+
+    if (item !== null) {
+      item.checked = true;
+    }
+  }
+
+  #setCharts = () => {
+    const {cards, dateFrom, isAllTime} = this._data;
+    const statisticCtx = this.element.querySelector('.statistic__chart');
+
+    renderGenresChart(statisticCtx, cards, dateFrom, isAllTime);
+  }
+
+  #setDateRange = () => {
+    const statisticFilters = this.element.querySelector('.statistic__filters');
+    statisticFilters.addEventListener('change', (evt) => {
+      switch (evt.target.value) {
+        case DateRangeName.ALL_TIME:
+          this.#dateItem = DateRangeName.ALL_TIME;
+          this.updateData({
+            isAllTime: true,
+          });
+          break;
+        case DateRangeName.TODAY:
+          this.#dateItem = DateRangeName.TODAY;
+          this.updateData({
+            dateFrom: DateFrom.TODAY,
+            isAllTime: false,
+          });
+          break;
+        case DateRangeName.WEEK:
+          this.#dateItem = DateRangeName.WEEK;
+          this.updateData({
+            dateFrom: DateFrom.WEEK,
+            isAllTime: false,
+          });
+          break;
+        case DateRangeName.MONTH:
+          this.#dateItem = DateRangeName.MONTH;
+          this.updateData({
+            dateFrom: DateFrom.MONTH,
+            isAllTime: false,
+          });
+          break;
+        case DateRangeName.YEAR:
+          this.#dateItem = DateRangeName.YEAR;
+          this.updateData({
+            dateFrom: DateFrom.YEAR,
+            isAllTime: false,
+          });
+          break;
+      }
+    });
   }
 }

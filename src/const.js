@@ -11,7 +11,9 @@ export const UserAction = {
 export const UpdateType = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
+  MINOR_POPUP: 'MINOR_POPUP',
   MAJOR: 'MAJOR',
+  DESTROY: 'DESTROY',
 };
 
 export const FilterType = {
@@ -19,4 +21,5 @@ export const FilterType = {
   WATCHLIST: 'watchlist',
   HISTORY: 'history',
   FAVORITES: 'favorites',
+  STATISTICS: 'stats',
 };
