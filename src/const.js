@@ -23,3 +23,5 @@ export const FilterType = {
   FAVORITES: 'favorites',
   STATISTICS: 'stats',
 };
+
+export const MINUTES_IN_HOUR = 60;

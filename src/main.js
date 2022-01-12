@@ -11,7 +11,7 @@ import FilterModel from './model/filter-model.js';
 
 import {generateMovie} from './mock/movie.js';
 
-const FILM_COUNT = 24;
+const FILM_COUNT = 23;
 
 const siteMainElement = document.querySelector('.main');
 const siteHeaderElement = document.querySelector('.header');

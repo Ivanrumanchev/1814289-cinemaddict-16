@@ -1,16 +1,6 @@
 import RankView from '../view/rank-view.js';
 import {render, RenderPosition, replace, remove} from '../utils/render.js';
-
-const Ranks = {
-  NOVICE: 'Novice',
-  FAN: 'Fun',
-  MOVIE_BUFF: 'Movie Buff',
-};
-
-const QuantityLevel = {
-  NOVICE: 10,
-  FAN: 20,
-};
+import {getRank} from '../utils/rank.js';
 
 export default class RankPresenter {
   #rankContainer = null;
@@ -28,14 +18,7 @@ export default class RankPresenter {
     const cards = this.#moviesModel.movies;
     const quantityFilms = cards.filter((card) => card.userDetails.alreadyWatched).length;
 
-    if (!quantityFilms) {
-      return '';
-    } else if (quantityFilms <= QuantityLevel.NOVICE) {
-      return Ranks.NOVICE;
-    } else if ( (quantityFilms > QuantityLevel.NOVICE) && (quantityFilms <= QuantityLevel.FAN) ) {
-      return Ranks.FAN;
-    }
-    return Ranks.MOVIE_BUFF;
+    return getRank(quantityFilms);
   }
 
   init = () => {

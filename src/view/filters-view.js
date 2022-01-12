@@ -2,14 +2,13 @@ import AbstractView from './abstract-view.js';
 
 const createFilterItemTemplate = (filter, currentFilterType) => {
   const {type, name, count} = filter;
+
   return (
     `<a
     href="#${ type }"
     class="main-navigation__item ${type === currentFilterType ? 'main-navigation__item--active' : ''}">
     ${name}
-    ${count ? `<span
-    class="main-navigation__item-count">${ count }
-    </span>` : ''}
+    ${count ? `<span class="main-navigation__item-count">${ count } </span>` : ''}
     </a>`
   );
 };

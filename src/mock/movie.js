@@ -96,16 +96,22 @@ const generateRandomString = (arr) => {
   return arr[randomIndex];
 };
 
-const generateRandomArray = (arr) => {
-  const quantity = getRandomInteger(0, arr.length - 1);
-  const newArr = arr.slice();
+const shuffleArray = (array) => {
+  const newArr = array.slice();
 
-  const severalItem = [];
-  for (let i = 0; i <= quantity; i++) {
-    severalItem.push( newArr.splice(getRandomInteger(0, (quantity - i)), 1)[0] );
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
   }
+  return newArr;
+};
 
-  return severalItem;
+const generateRandomArray = (arr) => {
+  const newArr = shuffleArray(arr);
+  const quantity = getRandomInteger(0, arr.length - 1);
+
+  return newArr.slice(quantity);
 };
 
 const generateDateComment = () => {
