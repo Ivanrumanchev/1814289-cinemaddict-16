@@ -2,7 +2,7 @@ import {createElement} from '../utils/render.js';
 
 export default class AbstractView {
   #element = null;
-  _callback = {};
+  _callbacks = new Map();
 
   constructor() {
     if (new.target === AbstractView) {

@@ -2,8 +2,9 @@ import FilmsContainerView from '../view/films-container-view.js';
 import SortView from '../view/sort-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsListEmptyView from '../view/films-list-empty-view.js';
-import FilmCardPresenter from './film-card-presetner.js';
+import FilmCardPresenter from './film-card-presenter.js';
 import ButtonShowMoreView from '../view/button-show-more-view.js';
+import StatisticsView from '../view/statistics-view.js';
 import {RenderPosition, render, remove} from '../utils/render.js';
 import {getDeepCopy, sortCardDate, sortCardRating, sortCardComments} from '../utils/common.js';
 import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
@@ -18,7 +19,7 @@ const FilmsListTitles = {
   MOST_COMMENTED: 'Most commented',
 };
 
-export default class MovieListPresenter {
+export default class MoviesListPresenter {
   #movieList = null;
   #moviesModel = null;
   #filterModel = null;
@@ -30,7 +31,9 @@ export default class MovieListPresenter {
   #showMoreButtonComponent = null;
   #filmsListEmptyComponent = null;
 
-  #filmsContainerComponent = new FilmsContainerView();
+  #filmsContainerComponent = null;
+
+  #statisticsComponent = null;
 
   #filmsListCommonComponent = new FilmsListView(FilmsListTitles.COMMON, false);
   #filmsListTopRatedComponent = new FilmsListView(FilmsListTitles.TOP_RATED, true);
@@ -44,13 +47,12 @@ export default class MovieListPresenter {
   #currentSortType = SortType.DEFAULT;
   #filterType = FilterType.ALL;
 
+  #statisticsMode = false;
+
   constructor(movieList, moviesModel, filterModel) {
     this.#movieList = movieList;
     this.#moviesModel = moviesModel;
     this.#filterModel = filterModel;
-
-    this.#moviesModel.addObserver(this.#handleModelEvent);
-    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get movies() {
@@ -77,6 +79,8 @@ export default class MovieListPresenter {
   }
 
   init = () => {
+    this.#filterModel.addObserver(this.#handleModelEvent);
+
     this.#renderFilmsContainer();
   }
 
@@ -181,6 +185,26 @@ export default class MovieListPresenter {
     this.#renderFilmsListMostCommented();
   }
 
+  #renderBoard = () => {
+    this.#renderSort();
+    this.#renderFilmsLists();
+  }
+
+  #renderFilmsContainer = () => {
+    this.#moviesModel.addObserver(this.#handleModelEvent);
+
+    this.#filmsContainerComponent = new FilmsContainerView();
+    render(this.#movieList, this.#filmsContainerComponent, RenderPosition.BEFOREEND);
+    this.#renderBoard();
+  }
+
+  #clearFilmsContainer = () => {
+    this.#moviesModel.removeObserver(this.#handleModelEvent);
+
+    remove(this.#filmsContainerComponent);
+    this.#clearBoard({resetRenderedCardCount: true, resetSortType: true});
+  }
+
   #clearBoard = ({resetRenderedCardCount = false, resetSortType = false} = {}) => {
     const cardsCount = this.movies.length;
 
@@ -205,11 +229,6 @@ export default class MovieListPresenter {
     }
   }
 
-  #renderBoard = () => {
-    this.#renderSort();
-    this.#renderFilmsLists();
-  }
-
   #clearFilmsLists = () => {
     this.#clearFilmsListCommon();
     this.#clearFilmsListTopRated();
@@ -219,21 +238,19 @@ export default class MovieListPresenter {
   #clearFilmsListCommon = () => {
     this.#filmCardPresenters.forEach((presenter) => presenter.destroy());
     this.#filmCardPresenters.clear();
+    remove(this.#filmsListCommonComponent);
   }
 
   #clearFilmsListTopRated = () => {
     this.#filmCardTopRatedPresenters.forEach((presenter) => presenter.destroy());
     this.#filmCardTopRatedPresenters.clear();
+    remove(this.#filmsListTopRatedComponent);
   }
 
   #clearFilmsListMostCommented = () => {
     this.#filmCardMostCommentedPresenters.forEach((presenter) => presenter.destroy());
     this.#filmCardMostCommentedPresenters.clear();
-  }
-
-  #renderFilmsContainer = () => {
-    render(this.#movieList, this.#filmsContainerComponent, RenderPosition.BEFOREEND);
-    this.#renderBoard();
+    remove(this.#filmsListMostCommentedComponent);
   }
 
   #handleShowMoreButtonClick = () => {
@@ -309,8 +326,21 @@ export default class MovieListPresenter {
         this.#handleOpenPopup(this.#openPopupCard);
         break;
       case UpdateType.MAJOR:
-        this.#clearBoard({resetRenderedCardCount: true, resetSortType: true});
-        this.#renderBoard();
+        if (this.#statisticsMode) {
+          this.#statisticsMode = false;
+          remove(this.#statisticsComponent);
+        }
+
+        this.#clearFilmsContainer();
+        this.#renderFilmsContainer();
+        break;
+      case UpdateType.DESTROY:
+        this.#statisticsMode = true;
+
+        this.#clearFilmsContainer();
+
+        this.#statisticsComponent = new StatisticsView(this.movies);
+        render(this.#movieList, this.#statisticsComponent, RenderPosition.BEFOREEND);
         break;
     }
   }

@@ -7,7 +7,7 @@ import PopupCommentView from '../view/popup-comment-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
 
 import {RenderPosition, render, remove, replace} from '../utils/render.js';
-import {getDeepCopy} from '../utils/common.js';
+import {getDeepCopy, getFullFormatDate} from '../utils/common.js';
 import {UserAction, UpdateType} from '../const.js';
 
 const Mode = {
@@ -19,6 +19,12 @@ const NewCardType = {
   USER_DETAILS: 'USER_DETAILS',
   NEW_COMMENT: 'NEW_COMMENT',
   DELETE_COMMENT: 'DELETE_COMMENT',
+};
+
+const UserDetailsUpdateType = {
+  WATCH_LIST: 'watchList',
+  ALREADY_WATCHED: 'alreadyWatched',
+  FAVORITE: 'favorite',
 };
 
 export default class FilmCardPresenter {
@@ -127,14 +133,17 @@ export default class FilmCardPresenter {
   #filmCardClickHandler = () => {
     const filmDetails = this.#popupComponent.element.querySelector('.film-details__inner');
     const commentsList = this.#popupCommentsListComponent.element.querySelector('.film-details__comments-list');
+
     this.#popupCommentComponents.forEach((component) => {
       render(commentsList, component, RenderPosition.BEFOREEND);
       component.setDeleteButtonClickHandler(this.#handleDeleteCommentClick);
     });
+
     this.#renderPopupNewComment(commentsList);
     render(filmDetails, this.#popupCommentsListComponent, RenderPosition.BEFOREEND);
     render(filmDetails, this.#popupFilmDetailsComponent, RenderPosition.AFTERBEGIN);
     render(document.body, this.#popupComponent, RenderPosition.BEFOREEND);
+
     document.body.classList.add('hide-overflow');
 
     this.#popupFilmDetailsComponent.setAddToWatchListClickHandler(this.#handleAddToWatchListPopupClick);
@@ -155,6 +164,11 @@ export default class FilmCardPresenter {
     switch (updateType) {
       case NewCardType.USER_DETAILS:
         newCard.userDetails[update] = !newCard.userDetails[update];
+
+        if (update === UserDetailsUpdateType.ALREADY_WATCHED) {
+          newCard.userDetails.watchingDate = getFullFormatDate(new Date()).toString();
+        }
+
         break;
       case NewCardType.NEW_COMMENT:
         newCard.comments.push(update);
@@ -168,7 +182,6 @@ export default class FilmCardPresenter {
   }
 
   #handleAddToWatchListCardClick = () => {
-    this.#cardComponent.element.querySelector('.film-card__controls-item--add-to-watchlist').classList.toggle('film-card__controls-item--active');
     if (this.#mode === Mode.OPENING) {
       this.#handleAddToWatchListPopupClick();
       return;
@@ -176,12 +189,11 @@ export default class FilmCardPresenter {
     this.#changeData(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      this.#createNewCard(NewCardType.USER_DETAILS, 'watchList'),
+      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.WATCH_LIST),
     );
   }
 
   #handleMarkAsWatchedCardClick = () => {
-    this.#cardComponent.element.querySelector('.film-card__controls-item--mark-as-watched').classList.toggle('film-card__controls-item--active');
     if (this.#mode === Mode.OPENING) {
       this.#handleMarkAsWatchedPopupClick();
       return;
@@ -189,12 +201,11 @@ export default class FilmCardPresenter {
     this.#changeData(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      this.#createNewCard(NewCardType.USER_DETAILS, 'alreadyWatched'),
+      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.ALREADY_WATCHED),
     );
   }
 
   #handleFavoriteCardClick = () => {
-    this.#cardComponent.element.querySelector('.film-card__controls-item--favorite').classList.toggle('film-card__controls-item--active');
     if (this.#mode === Mode.OPENING) {
       this.#handleFavoritePopupClick();
       return;
@@ -202,7 +213,7 @@ export default class FilmCardPresenter {
     this.#changeData(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      this.#createNewCard(NewCardType.USER_DETAILS, 'favorite'),
+      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.FAVORITE),
     );
   }
 
@@ -211,7 +222,7 @@ export default class FilmCardPresenter {
     this.#changeData(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      this.#createNewCard(NewCardType.USER_DETAILS, 'watchList'),
+      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.WATCH_LIST),
     );
   }
 
@@ -220,7 +231,7 @@ export default class FilmCardPresenter {
     this.#changeData(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      this.#createNewCard(NewCardType.USER_DETAILS, 'alreadyWatched'),
+      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.ALREADY_WATCHED),
     );
   }
 
@@ -229,7 +240,7 @@ export default class FilmCardPresenter {
     this.#changeData(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      this.#createNewCard(NewCardType.USER_DETAILS, 'favorite'),
+      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.FAVORITE),
     );
   }
 

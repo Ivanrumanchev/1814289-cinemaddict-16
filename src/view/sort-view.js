@@ -10,8 +10,6 @@ const createSortTemplate = (currentSortType) => (
 );
 
 export default class SortView extends AbstractView {
-  #callback = new Map();
-
   #currentSortType = null;
 
   constructor(currentSortType) {
@@ -24,7 +22,7 @@ export default class SortView extends AbstractView {
   }
 
   setSortTypeChangeHandler = (callback) => {
-    this.#callback.set('sortTypeChange', callback);
+    this._callbacks.set('sortTypeChange', callback);
     this.element.addEventListener('click', this.#sortTypeChangeHandler);
   }
 
@@ -34,6 +32,6 @@ export default class SortView extends AbstractView {
     }
 
     evt.preventDefault();
-    this.#callback.get('sortTypeChange')(evt.target.dataset.sortType);
+    this._callbacks.get('sortTypeChange')(evt.target.dataset.sortType);
   }
 }
