@@ -168,7 +168,7 @@ export const generateMovie = () => ({
     description: generateRandomArray(DESCRIPTION).slice(DESCRIPTIONS_QUANTITY_MIN, DESCRIPTIONS_QUANTITY_MAX).join(' ')
   },
   userDetails: {
-    watchList: Boolean(getRandomInteger()),
+    watchlist: Boolean(getRandomInteger()),
     alreadyWatched: Boolean(getRandomInteger()),
     watchingDate: generateWatchingDate(),
     favorite: Boolean(getRandomInteger())

@@ -1,18 +1,18 @@
 import AbstractView from './abstract-view.js';
 
-const createQuantityFilmsTemplate = (cards) => (
-  `<p>${ cards.length } movies inside</p>`
+const createQuantityFilmsTemplate = (quantityMovies) => (
+  `<p>${ quantityMovies } movies inside</p>`
 );
 
 export default class QuantityFilmsView extends AbstractView  {
-  #cards = null;
+  #quantityMovies = null;
 
-  constructor (cards) {
+  constructor (quantityMovies) {
     super();
-    this.#cards = cards;
+    this.#quantityMovies = quantityMovies;
   }
 
   get template() {
-    return createQuantityFilmsTemplate(this.#cards);
+    return createQuantityFilmsTemplate(this.#quantityMovies);
   }
 }

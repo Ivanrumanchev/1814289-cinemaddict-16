@@ -12,7 +12,7 @@ const cutString = (string) => {
 
 const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
   const {title, totalRating, poster, release, runtime, genre, description} = filmInfo;
-  const {watchList, alreadyWatched, favorite} = userDetails;
+  const {watchlist, alreadyWatched, favorite} = userDetails;
 
   return `<article class="film-card">
     <a class="film-card__link">
@@ -28,7 +28,7 @@ const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
       <span class="film-card__comments">${comments.length} comments</span>
     </a>
     <div class="film-card__controls">
-      <button class="film-card__controls-item film-card__controls-item--add-to-watchlist${ watchList ? ' film-card__controls-item--active' : '' }" type="button">Add to watchlist</button>
+      <button class="film-card__controls-item film-card__controls-item--add-to-watchlist${ watchlist ? ' film-card__controls-item--active' : '' }" type="button">Add to watchlist</button>
       <button class="film-card__controls-item film-card__controls-item--mark-as-watched${ alreadyWatched ? ' film-card__controls-item--active' : '' }" type="button">Mark as watched</button>
       <button class="film-card__controls-item film-card__controls-item--favorite${ favorite ? ' film-card__controls-item--active' : '' }" type="button">Mark as favorite</button>
     </div>

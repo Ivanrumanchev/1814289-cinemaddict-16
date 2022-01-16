@@ -14,6 +14,7 @@ export const UpdateType = {
   MINOR_POPUP: 'MINOR_POPUP',
   MAJOR: 'MAJOR',
   DESTROY: 'DESTROY',
+  INIT: 'INIT',
 };
 
 export const FilterType = {

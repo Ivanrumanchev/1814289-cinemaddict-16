@@ -2,6 +2,7 @@ import {MINUTES_IN_HOUR} from '../const.js';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import rfdc from 'rfdc';
 dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter);
 
@@ -33,24 +34,10 @@ export const getFullFormatDate = (date) => dayjs(date).format('YYYY-MM-DDTHH:mm:
 export const getHumanFormatDate = (date) => dayjs(date).fromNow();
 
 // for Generator
-export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toString();
-export const getRandomMinuteDate = (minutesGap) => dayjs().subtract(minutesGap, 'minute').toString();
+export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toDate();
+export const getRandomMinuteDate = (minutesGap) => dayjs().subtract(minutesGap, 'minute').toDate();
 
-export const getDeepCopy = (inObject) => {
-  if (typeof inObject !== 'object' || inObject === null) {
-    return inObject;
-  }
-
-  const outObject = Array.isArray(inObject) ? [] : {};
-
-  for (const key in inObject) {
-    const value = inObject[key];
-
-    outObject[key] = getDeepCopy(value);
-  }
-
-  return outObject;
-};
+export const getDeepCopy = rfdc();
 
 export const sortCardDate = (cardA, cardB) => dayjs(cardB.filmInfo.release.date).diff(dayjs(cardA.filmInfo.release.date));
 export const sortCardRating = (cardA, cardB) => cardB.filmInfo.totalRating - cardA.filmInfo.totalRating;
