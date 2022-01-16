@@ -308,19 +308,19 @@ export default class MoviesListPresenter {
     }
   }
 
-  #handleOpenPopup = (updatedCard) => {
+  #handleReOpenPopup = (updatedCard) => {
     const cardPresenter = this.#cardPresenters.get(updatedCard.id);
     const cardTopRatedPresenter = this.#cardTopRatedPresenters.get(updatedCard.id);
     const cardMostCommentedPresenter = this.#cardMostCommentedPresenters.get(updatedCard.id);
 
     if (cardPresenter !== undefined) {
-      cardPresenter.handleOpenPopupClick();
+      cardPresenter.handleReOpenPopupClick();
       cardPresenter.scrollPopup(this.#scrollPopupY);
     } else if (cardTopRatedPresenter !== undefined) {
-      cardTopRatedPresenter.handleOpenPopupClick();
+      cardTopRatedPresenter.handleReOpenPopupClick();
       cardTopRatedPresenter.scrollPopup(this.#scrollPopupY);
     } else if (cardMostCommentedPresenter !== undefined) {
-      cardMostCommentedPresenter.handleOpenPopupClick();
+      cardMostCommentedPresenter.handleReOpenPopupClick();
       cardMostCommentedPresenter.scrollPopup(this.#scrollPopupY);
     }
   }
@@ -339,7 +339,7 @@ export default class MoviesListPresenter {
         this.#handleCardChange(data);
         this.#clearFilmsListMostCommented();
         this.#renderFilmsListMostCommented();
-        this.#handleOpenPopup(this.#openPopupCard);
+        this.#handleReOpenPopup(this.#openPopupCard);
         break;
       case UpdateType.MINOR:
         this.#clearBoard();
@@ -348,7 +348,7 @@ export default class MoviesListPresenter {
       case UpdateType.MINOR_POPUP:
         this.#clearBoard();
         this.#renderBoard();
-        this.#handleOpenPopup(this.#openPopupCard);
+        this.#handleReOpenPopup(this.#openPopupCard);
         break;
       case UpdateType.MAJOR:
         if (this.#statisticsMode) {

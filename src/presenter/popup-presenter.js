@@ -7,28 +7,13 @@ import PopupCommentView from '../view/popup-comment-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
 
 import {RenderPosition, render, remove} from '../utils/render.js';
-import {getDeepCopy, getFullFormatDate} from '../utils/common.js';
-import {UserAction, UpdateType} from '../const.js';
-
-const Mode = {
-  DEFAULT: 'DEFAULT',
-  OPENING: 'OPENING',
-};
-
-const NewCardType = {
-  USER_DETAILS: 'USER_DETAILS',
-  NEW_COMMENT: 'NEW_COMMENT',
-  DELETE_COMMENT: 'DELETE_COMMENT',
-};
-
-const UserDetailsUpdateType = {
-  WATCH_LIST: 'watchlist',
-  ALREADY_WATCHED: 'alreadyWatched',
-  FAVORITE: 'favorite',
-};
+import {createNewCard} from '../utils/common.js';
+import {UserAction, UpdateType, NewCardType, UserDetailsUpdateType, Mode} from '../const.js';
 
 export default class PopupPresenter {
   #updateMovie = null;
+  #setScrollY = null;
+
   #changeModeClose = null;
 
   #mode = Mode.DEFAULT
@@ -42,19 +27,21 @@ export default class PopupPresenter {
 
   #card = null;
 
-  constructor(updateMovie, changeModeClose) {
+  constructor(updateMovie, setScrollY, changeModeClose) {
     this.#updateMovie = updateMovie;
+
+    this.#setScrollY = setScrollY;
 
     this.#changeModeClose = changeModeClose;
   }
 
-  init = (card) => {
+  init = (card, comments) => {
     this.#card = card;
 
     this.#popupComponent = new PopupView();
     this.#popupFilmDetailsComponent = new PopupFilmDetailsView(card);
     this.#popupCommentsListComponent = new PopupCommentsListView(card);
-    this.#popupCommentComponents = card.comments.map((comment) => new PopupCommentView(comment));
+    this.#popupCommentComponents = comments?.map((comment) => new PopupCommentView(comment));
     this.#popupNewCommentComponent = new PopupNewCommentView();
 
     this.#popupNewCommentComponent.setAddNewCommentHandler(this.#handleAddNewCommentKeydown);
@@ -76,18 +63,46 @@ export default class PopupPresenter {
     this.#popupComponent.element.scrollTo(0, scrollY);
   }
 
-  #handleClosePopupClick = () => {
-    this.#changeModeClose(this.#scrollPopupY);
-    this.#closeButtonClickHandler();
-    this.#popupNewCommentComponent.resetData();
-    this.#popupNewCommentComponent.newCommentKeysHandlersRemove();
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
-    this.#mode = Mode.DEFAULT;
+  handleAddToWatchListPopupClick = () => {
+    this.resetView();
+    this.#updateMovie(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.WATCH_LIST),
+    );
+  }
+
+  handleMarkAsWatchedPopupClick = () => {
+    this.resetView();
+    this.#updateMovie(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.ALREADY_WATCHED),
+    );
+  }
+
+  handleFavoritePopupClick = () => {
+    this.resetView();
+    this.#updateMovie(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.FAVORITE),
+    );
   }
 
   #renderPopupNewComment = (container) => {
     render(container, this.#popupNewCommentComponent, RenderPosition.AFTEREND);
     this.#popupNewCommentComponent.restoreHandlers();
+  }
+
+  #handleClosePopupClick = () => {
+    this.#setScrollY(this.#scrollPopupY);
+    this.#closeButtonClickHandler();
+    this.#popupNewCommentComponent.resetData();
+    this.#popupNewCommentComponent.newCommentKeysHandlersRemove();
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
+    this.#mode = Mode.DEFAULT;
+    this.#changeModeClose();
   }
 
   #closeButtonClickHandler = () => {
@@ -115,9 +130,9 @@ export default class PopupPresenter {
 
     document.body.classList.add('hide-overflow');
 
-    this.#popupFilmDetailsComponent.setAddToWatchListClickHandler(this.#handleAddToWatchListPopupClick);
-    this.#popupFilmDetailsComponent.setMarkAsWatchedClickHandler(this.#handleMarkAsWatchedPopupClick);
-    this.#popupFilmDetailsComponent.setFavoriteClickHandler(this.#handleFavoritePopupClick);
+    this.#popupFilmDetailsComponent.setAddToWatchListClickHandler(this.handleAddToWatchListPopupClick);
+    this.#popupFilmDetailsComponent.setMarkAsWatchedClickHandler(this.handleMarkAsWatchedPopupClick);
+    this.#popupFilmDetailsComponent.setFavoriteClickHandler(this.handleFavoritePopupClick);
   }
 
   #escKeyDownHandler = (evt) => {
@@ -127,62 +142,12 @@ export default class PopupPresenter {
     }
   }
 
-  #createNewCard = (updateType, update) => {
-    const newCard = getDeepCopy(this.#card);
-
-    switch (updateType) {
-      case NewCardType.USER_DETAILS:
-        newCard.userDetails[update] = !newCard.userDetails[update];
-
-        if (update === UserDetailsUpdateType.ALREADY_WATCHED) {
-          newCard.userDetails.watchingDate = getFullFormatDate(new Date()).toString();
-        }
-
-        break;
-      case NewCardType.NEW_COMMENT:
-        newCard.comments.push(update);
-        break;
-      case NewCardType.DELETE_COMMENT:
-        newCard.comments.splice(update, 1);
-        break;
-    }
-
-    return newCard;
-  }
-
-  #handleAddToWatchListPopupClick = () => {
-    this.resetView();
-    this.#updateMovie(
-      UserAction.UPDATE_MOVIE,
-      UpdateType.MINOR_POPUP,
-      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.WATCH_LIST),
-    );
-  }
-
-  #handleMarkAsWatchedPopupClick = () => {
-    this.resetView();
-    this.#updateMovie(
-      UserAction.UPDATE_MOVIE,
-      UpdateType.MINOR_POPUP,
-      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.ALREADY_WATCHED),
-    );
-  }
-
-  #handleFavoritePopupClick = () => {
-    this.resetView();
-    this.#updateMovie(
-      UserAction.UPDATE_MOVIE,
-      UpdateType.MINOR_POPUP,
-      this.#createNewCard(NewCardType.USER_DETAILS, UserDetailsUpdateType.FAVORITE),
-    );
-  }
-
   #handleAddNewCommentKeydown = (newComment) => {
     this.resetView();
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.PATCH,
-      this.#createNewCard(NewCardType.NEW_COMMENT, newComment),
+      createNewCard(this.#card, NewCardType.NEW_COMMENT, newComment),
     );
   }
 
@@ -192,7 +157,7 @@ export default class PopupPresenter {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.PATCH,
-      this.#createNewCard(NewCardType.DELETE_COMMENT, indexDeletedComment),
+      createNewCard(this.#card, NewCardType.DELETE_COMMENT, indexDeletedComment),
     );
   }
 }

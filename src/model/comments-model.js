@@ -25,6 +25,10 @@ export default class MoviesModel extends AbstractObservable {
     this._notify(UpdateType.INIT);
   }
 
+  clear = () => {
+    this.#comments = [];
+  }
+
   // updateMovie = (updateType, update) => {
   //   const index = this.#movies.findIndex((movie) => movie.id === update.id);
 

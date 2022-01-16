@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import rfdc from 'rfdc';
+import {NewCardType, UserDetailsUpdateType} from '../const.js';
 dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter);
 
@@ -33,12 +34,31 @@ export const getDayFormatDate = (date) => dayjs(date).format('D MMMM YYYY');
 export const getFullFormatDate = (date) => dayjs(date).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 export const getHumanFormatDate = (date) => dayjs(date).fromNow();
 
-// for Generator
-export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toDate();
-export const getRandomMinuteDate = (minutesGap) => dayjs().subtract(minutesGap, 'minute').toDate();
-
 export const getDeepCopy = rfdc();
 
 export const sortCardDate = (cardA, cardB) => dayjs(cardB.filmInfo.release.date).diff(dayjs(cardA.filmInfo.release.date));
 export const sortCardRating = (cardA, cardB) => cardB.filmInfo.totalRating - cardA.filmInfo.totalRating;
 export const sortCardComments = (cardA, cardB) => cardB.comments.length - cardA.comments.length;
+
+export const  createNewCard = (card, updateType, update) => {
+  const newCard = getDeepCopy(card);
+
+  switch (updateType) {
+    case NewCardType.USER_DETAILS:
+      newCard.userDetails[update] = !newCard.userDetails[update];
+
+      if (update === UserDetailsUpdateType.ALREADY_WATCHED) {
+        newCard.userDetails.watchingDate = getFullFormatDate(new Date()).toString();
+      }
+
+      break;
+    case NewCardType.NEW_COMMENT:
+      newCard.comments.push(update);
+      break;
+    case NewCardType.DELETE_COMMENT:
+      newCard.comments.splice(update, 1);
+      break;
+  }
+
+  return newCard;
+};
