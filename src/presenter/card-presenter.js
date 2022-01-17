@@ -9,7 +9,7 @@ const loadingComments = [{
   emotion: 'sleeping',
 }];
 
-export default class FilmCardPresenter {
+export default class CardPresenter {
   #parentElement = null;
   #updateMovie = null;
   #changeModeOpen = null;

@@ -2,7 +2,7 @@ import FilmsContainerView from '../view/films-container-view.js';
 import SortView from '../view/sort-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsListEmptyView from '../view/films-list-empty-view.js';
-import FilmCardPresenter from './film-card-presenter.js';
+import CardPresenter from './card-presenter.js';
 import ButtonShowMoreView from '../view/button-show-more-view.js';
 import StatisticsView from '../view/statistics-view.js';
 import LoadingView from '../view/loading-view.js';
@@ -111,21 +111,21 @@ export default class MoviesListPresenter {
 
   #renderCard = (card) => {
     const cardsContainerElement = this.#filmsListCommonComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new FilmCardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
     cardPresenter.init(card);
     this.#cardPresenters.set(card.id, cardPresenter);
   }
 
   #renderCardTopRated = (card) => {
     const cardsContainerElement = this.#filmsListTopRatedComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new FilmCardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
     cardPresenter.init(card);
     this.#cardTopRatedPresenters.set(card.id, cardPresenter);
   }
 
   #renderCardMostCommented = (card) => {
     const cardsContainerElement = this.#filmsListMostCommentedComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new FilmCardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
     cardPresenter.init(card);
     this.#cardMostCommentedPresenters.set(card.id, cardPresenter);
   }
@@ -381,6 +381,7 @@ export default class MoviesListPresenter {
     this.#cardPresenters.forEach((presenter) => presenter.resetView());
     this.#cardTopRatedPresenters.forEach((presenter) => presenter.resetView());
     this.#cardMostCommentedPresenters.forEach((presenter) => presenter.resetView());
+
     this.#openPopupCard = card;
   }
 
