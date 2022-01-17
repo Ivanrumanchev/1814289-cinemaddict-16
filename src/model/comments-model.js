@@ -2,6 +2,13 @@ import AbstractObservable from '../utils/abstract-observable.js';
 import {getDeepCopy} from '../utils/common.js';
 import {UpdateType} from '../const.js';
 
+const commentsNoLoading = [{
+  comment: 'Try updating the page later. Changes to comments will not be saved.',
+  emotion: 'puke',
+  loading: false,
+  fail: true,
+}];
+
 export default class MoviesModel extends AbstractObservable {
   #comments = [];
   #apiService = null;
@@ -17,33 +24,13 @@ export default class MoviesModel extends AbstractObservable {
 
   init = async (movie) => {
     try {
-      const comments = await this.#apiService.getComments(movie?.id);
+      const comments = await this.#apiService.getComments(movie.id);
       this.#comments = comments.map(this.#adaptToClient);
     } catch(err) {
-      this.#comments = [];
+      this.#comments = commentsNoLoading;
     }
     this._notify(UpdateType.INIT);
   }
-
-  clear = () => {
-    this.#comments = [];
-  }
-
-  // updateMovie = (updateType, update) => {
-  //   const index = this.#movies.findIndex((movie) => movie.id === update.id);
-
-  //   if (index === -1) {
-  //     throw new Error('Can\'t update unexisting movie');
-  //   }
-
-  //   this.#movies = [
-  //     ...this.#movies.slice(0, index),
-  //     update,
-  //     ...this.#movies.slice(index + 1),
-  //   ];
-
-  //   this._notify(updateType, update);
-  // }
 
   #adaptToClient = (comment) => {
     const newComment = getDeepCopy(comment);

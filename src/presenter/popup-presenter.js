@@ -40,7 +40,7 @@ export default class PopupPresenter {
 
     this.#popupComponent = new PopupView();
     this.#popupFilmDetailsComponent = new PopupFilmDetailsView(card);
-    this.#popupCommentsListComponent = new PopupCommentsListView(card);
+    this.#popupCommentsListComponent = new PopupCommentsListView(comments);
     this.#popupCommentComponents = comments?.map((comment) => new PopupCommentView(comment));
     this.#popupNewCommentComponent = new PopupNewCommentView();
 

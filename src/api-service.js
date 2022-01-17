@@ -22,7 +22,7 @@ export default class ApiService {
   getComments = (movieId) => this.#load({url: `comments/${movieId}`})
     .then(ApiService.parseResponse)
 
-  updateCard = async (movie) => {
+  updateMovie = async (movie) => {
     const response = await this.#load({
       url: `movies/${movie.id}`,
       method: Method.PUT,

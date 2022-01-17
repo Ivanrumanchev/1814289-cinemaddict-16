@@ -7,6 +7,7 @@ import {UserAction, UpdateType, NewCardType, UserDetailsUpdateType, Mode} from '
 const loadingComments = [{
   comment: 'Loading...',
   emotion: 'sleeping',
+  loading: true,
 }];
 
 export default class CardPresenter {
