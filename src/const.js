@@ -27,18 +27,6 @@ export const FilterType = {
 
 export const MINUTES_IN_HOUR = 60;
 
-export const NewCardType = {
-  USER_DETAILS: 'USER_DETAILS',
-  NEW_COMMENT: 'NEW_COMMENT',
-  DELETE_COMMENT: 'DELETE_COMMENT',
-};
-
-export const UserDetailsUpdateType = {
-  WATCH_LIST: 'watchlist',
-  ALREADY_WATCHED: 'alreadyWatched',
-  FAVORITE: 'favorite',
-};
-
 export const Mode = {
   DEFAULT: 'DEFAULT',
   OPENING: 'OPENING',

@@ -12,8 +12,8 @@ const createEmptyFilmsListTemplate = (filterType) => {
   const noFilmsTextValue = NoFilmsTextType[filterType];
   return (
     `<section class="films-list">
-    <h2 class="films-list__title">${ noFilmsTextValue }</h2>
-  </section>`
+      <h2 class="films-list__title">${ noFilmsTextValue }</h2>
+    </section>`
   );
 };
 

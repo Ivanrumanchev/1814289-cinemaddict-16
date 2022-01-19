@@ -8,7 +8,7 @@ import StatisticsView from '../view/statistics-view.js';
 import LoadingView from '../view/loading-view.js';
 import QuantityFilmsView from '../view/quantity-films-view.js';
 import {RenderPosition, render, remove} from '../utils/render.js';
-import {getDeepCopy, sortCardDate, sortCardRating, sortCardComments} from '../utils/common.js';
+import {sortCardDate, sortCardRating, sortCardComments} from '../utils/common.js';
 import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
 import {filter} from '../utils/filter.js';
 
@@ -67,7 +67,7 @@ export default class MoviesListPresenter {
 
   get movies() {
     this.#filterType = this.#filterModel.filter;
-    const cards = getDeepCopy(this.#moviesModel.movies);
+    const cards = this.#moviesModel.movies;
     const filteredCards = filter[this.#filterType](cards);
 
     switch (this.#currentSortType) {
@@ -81,11 +81,15 @@ export default class MoviesListPresenter {
   }
 
   get moviesTopRated() {
-    return getDeepCopy(this.#moviesModel.movies).sort(sortCardRating);
+    const cards = this.#moviesModel.movies;
+    const filteredCards = filter[FilterType.ALL](cards);
+    return filteredCards.sort(sortCardRating);
   }
 
   get moviesMostCommented() {
-    return getDeepCopy(this.#moviesModel.movies).sort(sortCardComments);
+    const cards = this.#moviesModel.movies;
+    const filteredCards = filter[FilterType.ALL](cards);
+    return filteredCards.sort(sortCardComments);
   }
 
   init = () => {

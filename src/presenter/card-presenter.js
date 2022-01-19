@@ -1,8 +1,7 @@
 import FilmCardView from '../view/film-card-view.js';
 import PopupPresenter from './popup-presenter.js';
 import {RenderPosition, render, remove, replace} from '../utils/render.js';
-import {createNewCard} from '../utils/common.js';
-import {UserAction, UpdateType, NewCardType, UserDetailsUpdateType, Mode} from '../const.js';
+import {UserAction, UpdateType, Mode} from '../const.js';
 
 const loadingComments = [{
   comment: 'Loading...',
@@ -106,10 +105,11 @@ export default class CardPresenter {
       this.#popupPresenter.handleAddToWatchListPopupClick();
       return;
     }
+    this.#cardComponent.element.querySelector('.film-card__controls-item--add-to-watchlist').classList.toggle('film-card__controls-item--active');
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.WATCH_LIST),
+      {...this.#card, userDetails: {...this.#card.userDetails, watchlist: !this.#card.userDetails.watchlist}},
     );
   }
 
@@ -118,10 +118,11 @@ export default class CardPresenter {
       this.#popupPresenter.handleMarkAsWatchedPopupClick();
       return;
     }
+    this.#cardComponent.element.querySelector('.film-card__controls-item--mark-as-watched').classList.toggle('film-card__controls-item--active');
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.ALREADY_WATCHED),
+      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched}},
     );
   }
 
@@ -130,10 +131,11 @@ export default class CardPresenter {
       this.#popupPresenter.handleFavoritePopupClick();
       return;
     }
+    this.#cardComponent.element.querySelector('.film-card__controls-item--favorite').classList.toggle('film-card__controls-item--active');
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.FAVORITE),
+      {...this.#card, userDetails: {...this.#card.userDetails, favorite: !this.#card.userDetails.favorite}},
     );
   }
 }

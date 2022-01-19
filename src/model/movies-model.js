@@ -1,10 +1,21 @@
 import AbstractObservable from '../utils/abstract-observable.js';
-import {getDeepCopy} from '../utils/common.js';
 import {UpdateType} from '../const.js';
+import {adaptToCamelCase} from '../utils/common.js';
+import {showAlert} from '../utils/loading.js';
 
+import {getLoaderDebounceTemplate} from '../utils/loading.js';
+
+const LOADER_CONTAINER_STYLE = `
+  z-index: 100;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  text-align: center;
+`;
 export default class MoviesModel extends AbstractObservable {
   #movies = [];
   #apiService = null;
+  #loading = false;
 
   constructor(apiService) {
     super();
@@ -26,63 +37,39 @@ export default class MoviesModel extends AbstractObservable {
   }
 
   updateMovie = async (updateType, update) => {
+    if (this.#loading) {
+      return;
+    }
+    this.#loading = true;
+
     const index = this.#movies.findIndex((movie) => movie.id === update.id);
 
     if (index === -1) {
-      throw new Error('Can\'t update unexisting movie');
+      showAlert('Can\'t update unexisting movie');
     }
+
+    const loadingContainer = document.createElement('div');
+    loadingContainer.innerHTML = getLoaderDebounceTemplate();
+    loadingContainer.style = LOADER_CONTAINER_STYLE;
+    document.body.append(loadingContainer);
 
     try {
       const response = await this.#apiService.updateMovie(update);
       const updatedMovie = this.#adaptToClient(response);
 
+      this.#loading = false;
+      loadingContainer.remove();
+
       this.#movies.splice(index, 1, updatedMovie);
 
       this._notify(updateType, updatedMovie);
     } catch(err) {
-      throw new Error('Can\'t update movie');
+      showAlert('Can\'t update movie');
+
+      loadingContainer.remove();
+      this.#loading = false;
     }
   }
 
-  #adaptToClient = (movie) => {
-    const newMovie = getDeepCopy(movie);
-
-    const adaptedMovieFilmInfoRelease = {...newMovie.film_info.release,
-      date: new Date(newMovie.film_info.release.date),
-      releaseCountry: newMovie.film_info.release.release_country,
-    };
-
-    const adaptedMovieFilmInfo = {...newMovie.film_info,
-      ageRating: newMovie.film_info.age_rating,
-      alternativeTitle: newMovie.film_info.alternative_title,
-      totalRating: newMovie.film_info.total_rating,
-      release: adaptedMovieFilmInfoRelease,
-    };
-
-    const adaptedMovieUserDetails = {...newMovie.user_details,
-      alreadyWatched: newMovie.user_details.already_watched,
-      watchingDate: newMovie.user_details.watching_date !== null
-        ? new Date(newMovie.user_details.watching_date)
-        : newMovie.user_details.watching_date,
-    };
-
-    const adaptedMovie = {...newMovie,
-      filmInfo: adaptedMovieFilmInfo,
-      userDetails: adaptedMovieUserDetails,
-    };
-
-    delete adaptedMovie.filmInfo.release.release_country;
-
-    delete adaptedMovie.filmInfo.age_rating;
-    delete adaptedMovie.filmInfo.alternative_title;
-    delete adaptedMovie.filmInfo.total_rating;
-
-    delete adaptedMovie.userDetails.already_watched;
-    delete adaptedMovie.userDetails.watching_date;
-
-    delete adaptedMovie.film_info;
-    delete adaptedMovie.user_details;
-
-    return adaptedMovie;
-  }
+  #adaptToClient = (movie) => adaptToCamelCase(movie);
 }

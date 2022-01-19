@@ -1,4 +1,5 @@
 import {getHumanFormatDate} from '../utils/common.js';
+import {getLoaderTemplate} from '../utils/loading.js';
 import AbstractView from './abstract-view.js';
 import he from 'he';
 
@@ -8,19 +9,21 @@ const createCommentTemplate = (commentary) => {
   const fail = commentary?.fail;
   const isInfoMessage = (loading || fail);
 
-  return `<li class="film-details__comment">
-    <span class="film-details__comment-emoji">
-      ${emotion ? `<img src="./images/emoji/${ emotion }.png" width="55" height="55" alt="emoji-smile">` : ''}
-    </span>
-    <div>
-      <p class="film-details__comment-text">${ comment ? he.encode(comment) : '' }</p>
-      ${isInfoMessage ? '' : `<p class="film-details__comment-info">
-        <span class="film-details__comment-author">${ author ? author : '' }</span>
-        <span class="film-details__comment-day">${ date ? getHumanFormatDate(date) : getHumanFormatDate(new Date) }</span>
-        <button class="film-details__comment-delete">Delete</button>
-      </p>`}
-    </div>
-  </li>`;
+  return (
+    `<li class="film-details__comment">
+      <span class="film-details__comment-emoji">
+        ${emotion ? `<img src="./images/emoji/${ emotion }.png" width="55" height="55" alt="emoji-smile">` : ''}
+      </span>
+      <div>
+        <p class="film-details__comment-text">${ comment ? he.encode(comment) : '' }</p>
+        ${isInfoMessage ? getLoaderTemplate() : `<p class="film-details__comment-info">
+          <span class="film-details__comment-author">${ author ? author : '' }</span>
+          <span class="film-details__comment-day">${ date ? getHumanFormatDate(date) : getHumanFormatDate(new Date) }</span>
+          <button class="film-details__comment-delete">Delete</button>
+        </p>`}
+      </div>
+    </li>`
+  );
 };
 
 export default class PopupCommentView extends AbstractView {

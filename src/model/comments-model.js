@@ -1,5 +1,4 @@
 import AbstractObservable from '../utils/abstract-observable.js';
-import {getDeepCopy} from '../utils/common.js';
 import {UpdateType} from '../const.js';
 
 const commentsNoLoading = [{
@@ -33,12 +32,10 @@ export default class MoviesModel extends AbstractObservable {
   }
 
   #adaptToClient = (comment) => {
-    const newComment = getDeepCopy(comment);
-
-    const adaptedComment = {...newComment,
-      date: new Date(newComment.date) !== null
-        ? new Date(newComment.date)
-        : newComment.date,
+    const adaptedComment = {...comment,
+      date: new Date(comment.date) !== null
+        ? new Date(comment.date)
+        : comment.date,
     };
 
     return adaptedComment;

@@ -2,8 +2,8 @@ import {MINUTES_IN_HOUR} from '../const.js';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
-import rfdc from 'rfdc';
-import {NewCardType, UserDetailsUpdateType} from '../const.js';
+import toSnakeCase from 'lodash/snakeCase';
+import toCamelCase from 'lodash/camelCase';
 dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter);
 
@@ -34,31 +34,52 @@ export const getDayFormatDate = (date) => dayjs(date).format('D MMMM YYYY');
 export const getFullFormatDate = (date) => dayjs(date).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 export const getHumanFormatDate = (date) => dayjs(date).fromNow();
 
-export const getDeepCopy = rfdc();
-
 export const sortCardDate = (cardA, cardB) => dayjs(cardB.filmInfo.release.date).diff(dayjs(cardA.filmInfo.release.date));
 export const sortCardRating = (cardA, cardB) => cardB.filmInfo.totalRating - cardA.filmInfo.totalRating;
 export const sortCardComments = (cardA, cardB) => cardB.comments.length - cardA.comments.length;
 
-export const  createNewCard = (card, updateType, update) => {
-  const newCard = getDeepCopy(card);
+export const adaptToSnakeCase = (inObject) => {
+  const keyValues = Object.keys(inObject).map((key) => {
+    const value = inObject[key];
+    const keyInSnakeCase = toSnakeCase(key);
 
-  switch (updateType) {
-    case NewCardType.USER_DETAILS:
-      newCard.userDetails[update] = !newCard.userDetails[update];
-
-      if (update === UserDetailsUpdateType.ALREADY_WATCHED) {
-        newCard.userDetails.watchingDate = getFullFormatDate(new Date()).toString();
+    if (Array.isArray(value) || typeof value !== 'object' || value === null) {
+      if (key === keyInSnakeCase) {
+        return { [key]: value };
       }
+      return { [keyInSnakeCase]: value };
+    }
 
-      break;
-    case NewCardType.NEW_COMMENT:
-      newCard.comments.push(update);
-      break;
-    case NewCardType.DELETE_COMMENT:
-      newCard.comments.splice(update, 1);
-      break;
-  }
+    const adaptedObject = adaptToSnakeCase(value);
 
-  return newCard;
+    if (key === keyInSnakeCase) {
+      return { [key]: adaptedObject };
+    }
+    return { [keyInSnakeCase]: adaptedObject };
+  });
+
+  return Object.assign({}, ...keyValues);
+};
+
+export const adaptToCamelCase = (inObject) => {
+  const keyValues = Object.keys(inObject).map((key) => {
+    const value = inObject[key];
+    const keyInCamelCase = toCamelCase(key);
+
+    if (Array.isArray(value) || typeof value !== 'object' || value === null) {
+      if (key === keyInCamelCase) {
+        return { [key]: value };
+      }
+      return { [keyInCamelCase]: value };
+    }
+
+    const adaptedObject = adaptToCamelCase(value);
+
+    if (key === keyInCamelCase) {
+      return { [key]: adaptedObject };
+    }
+    return { [keyInCamelCase]: adaptedObject };
+  });
+
+  return Object.assign({}, ...keyValues);
 };

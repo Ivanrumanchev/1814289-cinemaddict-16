@@ -1,4 +1,4 @@
-import {getDeepCopy} from './utils/common.js';
+import { adaptToSnakeCase } from './utils/common.js';
 
 const Method = {
   GET: 'GET',
@@ -56,49 +56,7 @@ export default class ApiService {
     }
   }
 
-  #adaptToServer = (movie) => {
-    const newMovie = getDeepCopy(movie);
-
-    const adaptedMovieFilmInfoRelease = {...newMovie.filmInfo.release,
-      date: newMovie.filmInfo.release.date instanceof Date
-        ? newMovie.filmInfo.release.date.toISOString()
-        : newMovie.filmInfo.release.date,
-      'release_country': newMovie.filmInfo.release.releaseCountry,
-    };
-
-    const adaptedMovieFilmInfo = {...newMovie.filmInfo,
-      'age_rating': newMovie.filmInfo.ageRating,
-      'alternative_title': newMovie.filmInfo.alternativeTitle,
-      'total_rating': newMovie.filmInfo.totalRating,
-      release: adaptedMovieFilmInfoRelease,
-    };
-
-    const adaptedMovieUserDetails = {...newMovie.userDetails,
-      'already_watched': newMovie.userDetails.alreadyWatched,
-      'watching_date': newMovie.userDetails.watchingDate instanceof Date
-        ? newMovie.userDetails.watchingDate.toISOString()
-        : newMovie.userDetails.watchingDate,
-    };
-
-    const adaptedMovie = {...newMovie,
-      'film_info': adaptedMovieFilmInfo,
-      'user_details': adaptedMovieUserDetails,
-    };
-
-    delete adaptedMovie.filmInfo.release.releaseCountry;
-
-    delete adaptedMovie.filmInfo.ageRating;
-    delete adaptedMovie.filmInfo.alternativeTitle;
-    delete adaptedMovie.filmInfo.totalRating;
-
-    delete adaptedMovie.userDetails.alreadyWatched;
-    delete adaptedMovie.userDetails.watchingDate;
-
-    delete adaptedMovie.filmInfo;
-    delete adaptedMovie.userDetails;
-
-    return adaptedMovie;
-  }
+  #adaptToServer = (movie) => adaptToSnakeCase(movie);
 
   static parseResponse = (response) => response.json();
 

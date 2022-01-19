@@ -7,8 +7,7 @@ import PopupCommentView from '../view/popup-comment-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
 
 import {RenderPosition, render, remove} from '../utils/render.js';
-import {createNewCard} from '../utils/common.js';
-import {UserAction, UpdateType, NewCardType, UserDetailsUpdateType, Mode} from '../const.js';
+import {UserAction, UpdateType, Mode} from '../const.js';
 
 export default class PopupPresenter {
   #updateMovie = null;
@@ -68,7 +67,7 @@ export default class PopupPresenter {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.WATCH_LIST),
+      {...this.#card, userDetails: {...this.#card.userDetails, watchlist: !this.#card.userDetails.watchlist}},
     );
   }
 
@@ -77,7 +76,7 @@ export default class PopupPresenter {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.ALREADY_WATCHED),
+      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched}},
     );
   }
 
@@ -86,7 +85,7 @@ export default class PopupPresenter {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      createNewCard(this.#card, NewCardType.USER_DETAILS, UserDetailsUpdateType.FAVORITE),
+      {...this.#card, userDetails: {...this.#card.userDetails, favorite: !this.#card.userDetails.favorite}},
     );
   }
 
@@ -147,17 +146,21 @@ export default class PopupPresenter {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.PATCH,
-      createNewCard(this.#card, NewCardType.NEW_COMMENT, newComment),
+      {...this.#card, comments: {...this.#card.comments, newComment}},
     );
   }
 
   #handleDeleteCommentClick = (commentId) => {
     const indexDeletedComment = this.#card.comments.findIndex(({id}) => id === commentId);
+    const newCard = {...this.#card, comments: {...this.#card.comments}};
+
+    newCard.comments.splice(indexDeletedComment, 1);
+
     this.resetView();
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.PATCH,
-      createNewCard(this.#card, NewCardType.DELETE_COMMENT, indexDeletedComment),
+      newCard,
     );
   }
 }
