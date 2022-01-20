@@ -10,6 +10,7 @@ import {UserAction, UpdateType, Mode} from '../const.js';
 
 export default class PopupPresenter {
   #updateMovie = null;
+  #updateComments = null;
 
   #mode = Mode.DEFAULT
 
@@ -22,8 +23,9 @@ export default class PopupPresenter {
 
   #card = null;
 
-  constructor(updateMovie) {
+  constructor(updateMovie, updateComments) {
     this.#updateMovie = updateMovie;
+    this.#updateComments = updateComments;
   }
 
   init = (card, comments) => {
@@ -53,8 +55,8 @@ export default class PopupPresenter {
   }
 
   reInitComments = (update) => {
-    this.#updateCommentsList(update);
-    this.#updateComments(update);
+    this.#reInitCommentsList(update);
+    this.#reInitComments(update);
   }
 
   #createNewComponentsPopup = (card, comments) => {
@@ -73,12 +75,12 @@ export default class PopupPresenter {
     this.#popupNewCommentComponent.setAddNewCommentHandler(this.#handleAddNewCommentKeydown);
   }
 
-  #updateCommentsList = (update) => {
+  #reInitCommentsList = (update) => {
     this.#popupCommentsListComponent.resetData();
     this.#popupCommentsListComponent.updateData(update);
   }
 
-  #updateComments = (update) => {
+  #reInitComments = (update) => {
     this.#popupCommentComponents.forEach((component) => remove(component));
     this.#popupCommentComponents = update?.map((comment) => new PopupCommentView(comment));
 
@@ -169,10 +171,12 @@ export default class PopupPresenter {
   }
 
   #handleMarkAsWatchedPopupClick = () => {
+    const today = new Date();
+
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched}},
+      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched, watchingDate: today.toISOString()}},
     );
   }
 
@@ -185,23 +189,20 @@ export default class PopupPresenter {
   }
 
   #handleAddNewCommentKeydown = (newComment) => {
-    this.#updateMovie(
-      UserAction.UPDATE_MOVIE,
+    this.#updateComments(
+      UserAction.ADD_COMMENT,
       UpdateType.PATCH,
-      {...this.#card, comments: {...this.#card.comments, newComment}},
+      newComment,
+      this.#card,
     );
   }
 
-  #handleDeleteCommentClick = (commentId) => {
-    const indexDeletedComment = this.#card.comments.findIndex(({id}) => id === commentId);
-    const newCard = {...this.#card, comments: Object.values(this.#card.comments)};
-
-    newCard.comments.splice(indexDeletedComment, 1);
-
-    this.#updateMovie(
-      UserAction.UPDATE_MOVIE,
+  #handleDeleteCommentClick = (comment) => {
+    this.#updateComments(
+      UserAction.DELETE_COMMENT,
       UpdateType.PATCH,
-      newCard,
+      comment,
+      this.#card,
     );
   }
 }

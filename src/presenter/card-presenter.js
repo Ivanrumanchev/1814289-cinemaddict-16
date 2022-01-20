@@ -61,10 +61,12 @@ export default class CardPresenter {
   }
 
   #handleMarkAsWatchedCardClick = () => {
+    const today = new Date();
+
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched}},
+      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched, watchingDate: today.toISOString()}},
     );
   }
 

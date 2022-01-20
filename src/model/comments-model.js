@@ -1,5 +1,6 @@
 import AbstractObservable from '../utils/abstract-observable.js';
 import {UpdateType} from '../const.js';
+import {showAlert} from '../utils/loading.js';
 
 const commentsNoLoading = [{
   comment: 'Try updating the page later. Changes to comments will not be saved.',
@@ -23,21 +24,38 @@ export default class MoviesModel extends AbstractObservable {
 
   init = async (movie) => {
     try {
-      const comments = await this.#apiService.getComments(movie.id);
-      this.#comments = comments.map(this.#adaptToClient);
+      this.#comments = await this.#apiService.getComments(movie.id);
     } catch(err) {
       this.#comments = commentsNoLoading;
     }
     this._notify(UpdateType.INIT);
   }
 
-  #adaptToClient = (comment) => {
-    const adaptedComment = {...comment,
-      date: new Date(comment.date) !== null
-        ? new Date(comment.date)
-        : comment.date,
-    };
+  addComment = async (updateType, updatedComment, updatedMovie) => {
+    try {
+      const response = await this.#apiService.addComment(updatedMovie, updatedComment);
+      this.#comments = response.comments;
 
-    return adaptedComment;
+      this._notify(updateType);
+    } catch(err) {
+      showAlert('Can\'t add comment');
+    }
+  }
+
+  deleteComment = async (updateType, updatedComment) => {
+    const index = this.#comments.findIndex((comment) => comment.id === updatedComment.id);
+
+    if (index === -1) {
+      showAlert('Can\'t delete unexisting comment');
+    }
+
+    try {
+      await this.#apiService.deleteComment(updatedComment);
+      this.#comments.splice(index, 1);
+
+      this._notify(updateType);
+    } catch(err) {
+      showAlert('Can\'t delete comment');
+    }
   }
 }

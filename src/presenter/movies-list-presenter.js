@@ -102,7 +102,7 @@ export default class MoviesListPresenter {
 
   init = () => {
     this.#filterModel.addObserver(this.#handleModelEvent);
-    this.#popupPresenter = new PopupPresenter(this.#handleViewAction);
+    this.#popupPresenter = new PopupPresenter(this.#handleViewMovieAction, this.#handleViewPopupAction);
 
     this.#renderFilmsContainer();
   }
@@ -124,21 +124,21 @@ export default class MoviesListPresenter {
 
   #renderCard = (card) => {
     const cardsContainerElement = this.#filmsListCommonComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewMovieAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
     cardPresenter.init(card);
     this.#cardPresenters.set(card.id, cardPresenter);
   }
 
   #renderCardTopRated = (card) => {
     const cardsContainerElement = this.#filmsListTopRatedComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewMovieAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
     cardPresenter.init(card);
     this.#cardTopRatedPresenters.set(card.id, cardPresenter);
   }
 
   #renderCardMostCommented = (card) => {
     const cardsContainerElement = this.#filmsListMostCommentedComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewMovieAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
     cardPresenter.init(card);
     this.#cardMostCommentedPresenters.set(card.id, cardPresenter);
   }
@@ -329,10 +329,32 @@ export default class MoviesListPresenter {
     this.#commentsModel.init(this.#openPopupCard);
   }
 
+  #handleViewPopupAction = (actionType, updateType, movie, comment) => {
+    switch (actionType) {
+      case UserAction.ADD_COMMENT:
+        this.#commentsModel.addComment(updateType, movie, comment);
+        break;
+      case UserAction.DELETE_COMMENT:
+        this.#commentsModel.deleteComment(updateType, movie, comment);
+        break;
+    }
+  }
+
   #handleModelPopupEvent = (updateType) => {
     switch (updateType) {
       case UpdateType.INIT:
         this.#popupPresenter.reInitComments(this.#commentsModel.comments);
+        break;
+      case UpdateType.PATCH:
+        this.#openPopupCard.comments = this.#commentsModel.comments.map((comment) => comment.id);
+        this.#handleCardChange(this.#openPopupCard);
+        this.#clearFilmsListMostCommented();
+        this.#renderFilmsListMostCommented();
+
+        this.#popupPresenter.setOpenCard(this.#openPopupCard);
+
+        this.#popupPresenter.reInitComments(this.#commentsModel.comments);
+        break;
     }
   }
 
@@ -340,7 +362,7 @@ export default class MoviesListPresenter {
     this.#openPopupCard = card;
   }
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewMovieAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_MOVIE:
         this.#moviesModel.updateMovie(updateType, update);
@@ -350,15 +372,6 @@ export default class MoviesListPresenter {
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
-      case UpdateType.PATCH:
-        this.#handleCardChange(data);
-        this.#clearFilmsListMostCommented();
-        this.#renderFilmsListMostCommented();
-
-        this.#popupPresenter.setOpenCard(data);
-        this.#setOpenPopupCard(data);
-        this.#popupPresenter.reInitComments(this.#commentsModel.comments);
-        break;
       case UpdateType.MINOR:
         this.#clearBoard();
         this.#renderBoard();

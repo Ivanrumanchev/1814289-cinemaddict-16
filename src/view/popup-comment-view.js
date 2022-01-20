@@ -39,7 +39,7 @@ export default class PopupCommentView extends SmartView {
   }
 
   setDeleteButtonClickHandler = (callback) => {
-    this._callbacks.set('AddNewCommentClick', callback);
+    this._callbacks.set('deleteCommentClick', callback);
 
     const deleteButton = this.element?.querySelector('.film-details__comment-delete');
     deleteButton?.addEventListener('click', this.#deleteButtonClickHandler);
@@ -47,6 +47,6 @@ export default class PopupCommentView extends SmartView {
 
   #deleteButtonClickHandler = (evt) => {
     evt.preventDefault();
-    this._callbacks.get('AddNewCommentClick')(this.#comment?.id);
+    this._callbacks.get('deleteCommentClick')(this.#comment);
   }
 }
