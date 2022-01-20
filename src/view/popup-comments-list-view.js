@@ -1,4 +1,4 @@
-import AbstractView from './abstract-view.js';
+import SmartView from './smart-view.js';
 
 const TextComments = {
   LOADING: 'are loading',
@@ -31,15 +31,21 @@ const createCommentsListTemplate = (comments) => {
   );
 };
 
-export default class PopupCommentsListView extends AbstractView {
-  #card = null;
-
-  constructor (card) {
+export default class PopupCommentsListView extends SmartView {
+  constructor (comments) {
     super();
-    this.#card = card;
+    this._data = {...this._data, ...comments};
   }
 
   get template() {
-    return createCommentsListTemplate(this.#card);
+    return createCommentsListTemplate(Object.values(this._data));
+  }
+
+  restoreHandlers = () => {
+
+  }
+
+  resetData = () => {
+    this._data = {};
   }
 }

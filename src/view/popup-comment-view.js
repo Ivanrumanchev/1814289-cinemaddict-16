@@ -1,6 +1,6 @@
 import {getHumanFormatDate} from '../utils/common.js';
 import {getLoaderTemplate} from '../utils/loading.js';
-import AbstractView from './abstract-view.js';
+import SmartView from './smart-view.js';
 import he from 'he';
 
 const createCommentTemplate = (commentary) => {
@@ -26,7 +26,7 @@ const createCommentTemplate = (commentary) => {
   );
 };
 
-export default class PopupCommentView extends AbstractView {
+export default class PopupCommentView extends SmartView {
   #comment = null;
 
   constructor (comment) {

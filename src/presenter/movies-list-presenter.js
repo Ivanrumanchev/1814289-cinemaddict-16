@@ -3,6 +3,7 @@ import SortView from '../view/sort-view.js';
 import FilmsListView from '../view/films-list-view.js';
 import FilmsListEmptyView from '../view/films-list-empty-view.js';
 import CardPresenter from './card-presenter.js';
+import PopupPresenter from './popup-presenter.js';
 import ButtonShowMoreView from '../view/button-show-more-view.js';
 import StatisticsView from '../view/statistics-view.js';
 import LoadingView from '../view/loading-view.js';
@@ -21,6 +22,12 @@ const FilmsListTitles = {
   MOST_COMMENTED: 'Most commented',
 };
 
+const loadingComments = [{
+  comment: 'Loading...',
+  emotion: 'sleeping',
+  loading: true,
+}];
+
 export default class MoviesListPresenter {
   #movieList = null;
   #footerStatistics = null;
@@ -29,13 +36,14 @@ export default class MoviesListPresenter {
   #commentsModel = null;
 
   #openPopupCard = null;
-  #scrollPopupY = 0;
 
   #sortComponent = null;
   #showMoreButtonComponent = null;
   #filmsListEmptyComponent = null;
 
   #filmsContainerComponent = null;
+
+  #popupPresenter = null;
 
   #statisticsComponent = null;
   #quantityFilmsComponent = null;
@@ -94,6 +102,7 @@ export default class MoviesListPresenter {
 
   init = () => {
     this.#filterModel.addObserver(this.#handleModelEvent);
+    this.#popupPresenter = new PopupPresenter(this.#handleViewAction);
 
     this.#renderFilmsContainer();
   }
@@ -115,21 +124,21 @@ export default class MoviesListPresenter {
 
   #renderCard = (card) => {
     const cardsContainerElement = this.#filmsListCommonComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
     cardPresenter.init(card);
     this.#cardPresenters.set(card.id, cardPresenter);
   }
 
   #renderCardTopRated = (card) => {
     const cardsContainerElement = this.#filmsListTopRatedComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
     cardPresenter.init(card);
     this.#cardTopRatedPresenters.set(card.id, cardPresenter);
   }
 
   #renderCardMostCommented = (card) => {
     const cardsContainerElement = this.#filmsListMostCommentedComponent.element.querySelector('.films-list__container');
-    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#handleOpenModeChange, this.#handleCloseModeChange, this.#commentsModel);
+    const cardPresenter = new CardPresenter(cardsContainerElement, this.#handleViewAction, this.#setOpenPopupCard, this.#handleOpenPopupClick);
     cardPresenter.init(card);
     this.#cardMostCommentedPresenters.set(card.id, cardPresenter);
   }
@@ -312,21 +321,23 @@ export default class MoviesListPresenter {
     }
   }
 
-  #handleReOpenPopup = (updatedCard) => {
-    const cardPresenter = this.#cardPresenters.get(updatedCard.id);
-    const cardTopRatedPresenter = this.#cardTopRatedPresenters.get(updatedCard.id);
-    const cardMostCommentedPresenter = this.#cardMostCommentedPresenters.get(updatedCard.id);
+  #handleOpenPopupClick = () => {
+    this.#commentsModel.addObserver(this.#handleModelPopupEvent);
+    this.#popupPresenter.resetView();
 
-    if (cardPresenter !== undefined) {
-      cardPresenter.handleReOpenPopupClick();
-      cardPresenter.scrollPopup(this.#scrollPopupY);
-    } else if (cardTopRatedPresenter !== undefined) {
-      cardTopRatedPresenter.handleReOpenPopupClick();
-      cardTopRatedPresenter.scrollPopup(this.#scrollPopupY);
-    } else if (cardMostCommentedPresenter !== undefined) {
-      cardMostCommentedPresenter.handleReOpenPopupClick();
-      cardMostCommentedPresenter.scrollPopup(this.#scrollPopupY);
+    this.#popupPresenter.init(this.#openPopupCard, loadingComments);
+    this.#commentsModel.init(this.#openPopupCard);
+  }
+
+  #handleModelPopupEvent = (updateType) => {
+    switch (updateType) {
+      case UpdateType.INIT:
+        this.#popupPresenter.reInitComments(this.#commentsModel.comments);
     }
+  }
+
+  #setOpenPopupCard = (card) => {
+    this.#openPopupCard = card;
   }
 
   #handleViewAction = (actionType, updateType, update) => {
@@ -343,7 +354,10 @@ export default class MoviesListPresenter {
         this.#handleCardChange(data);
         this.#clearFilmsListMostCommented();
         this.#renderFilmsListMostCommented();
-        this.#handleReOpenPopup(this.#openPopupCard);
+
+        this.#popupPresenter.setOpenCard(data);
+        this.#setOpenPopupCard(data);
+        this.#popupPresenter.reInitComments(this.#commentsModel.comments);
         break;
       case UpdateType.MINOR:
         this.#clearBoard();
@@ -352,7 +366,10 @@ export default class MoviesListPresenter {
       case UpdateType.MINOR_POPUP:
         this.#clearBoard();
         this.#renderBoard();
-        this.#handleReOpenPopup(this.#openPopupCard);
+
+        this.#popupPresenter.setOpenCard(data);
+        this.#setOpenPopupCard(data);
+        this.#popupPresenter.reInitControlButtons(data);
         break;
       case UpdateType.MAJOR:
         if (this.#statisticsMode) {
@@ -381,25 +398,12 @@ export default class MoviesListPresenter {
     }
   }
 
-  #handleOpenModeChange = (card) => {
-    this.#cardPresenters.forEach((presenter) => presenter.resetView());
-    this.#cardTopRatedPresenters.forEach((presenter) => presenter.resetView());
-    this.#cardMostCommentedPresenters.forEach((presenter) => presenter.resetView());
-
-    this.#openPopupCard = card;
-  }
-
-  #handleCloseModeChange = (scroll) => {
-    this.#scrollPopupY = scroll;
-  }
-
   #handleSortTypeChange = (sortType) => {
     if (this.#currentSortType === sortType) {
       return;
     }
 
     this.#currentSortType = sortType;
-    this.#handleOpenModeChange();
     this.#clearBoard({resetRenderedCardCount: true});
     this.#renderBoard();
   }

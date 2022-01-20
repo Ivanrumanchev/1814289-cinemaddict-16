@@ -1,7 +1,6 @@
-// import FilmCardView from '../view/film-card-view.js';
-
 import PopupView from '../view/popup-view.js';
 import PopupFilmDetailsView from '../view/popup-film-details-view.js';
+import PopupControlButtonsView from '../view/popup-control-buttons-view.js';
 import PopupCommentsListView from '../view/popup-comments-list-view.js';
 import PopupCommentView from '../view/popup-comment-view.js';
 import PopupNewCommentView from '../view/popup-new-comment-view.js';
@@ -11,82 +10,91 @@ import {UserAction, UpdateType, Mode} from '../const.js';
 
 export default class PopupPresenter {
   #updateMovie = null;
-  #setScrollY = null;
-
-  #changeModeClose = null;
 
   #mode = Mode.DEFAULT
-  #scrollPopupY = 0;
 
   #popupComponent = null;
   #popupFilmDetailsComponent = null;
+  #popupControlButtonsComponent = null;
   #popupCommentsListComponent = null;
   #popupCommentComponents = [];
   #popupNewCommentComponent = null;
 
   #card = null;
 
-  constructor(updateMovie, setScrollY, changeModeClose) {
+  constructor(updateMovie) {
     this.#updateMovie = updateMovie;
-
-    this.#setScrollY = setScrollY;
-
-    this.#changeModeClose = changeModeClose;
   }
 
   init = (card, comments) => {
     this.#card = card;
 
-    this.#popupComponent = new PopupView();
-    this.#popupFilmDetailsComponent = new PopupFilmDetailsView(card);
-    this.#popupCommentsListComponent = new PopupCommentsListView(comments);
-    this.#popupCommentComponents = comments?.map((comment) => new PopupCommentView(comment));
-    this.#popupNewCommentComponent = new PopupNewCommentView();
+    this.#createNewComponentsPopup(card, comments);
 
-    this.#popupNewCommentComponent.setAddNewCommentHandler(this.#handleAddNewCommentKeydown);
+    this.#handleCardClick();
 
-    this.#filmCardClickHandler();
-    document.addEventListener('keydown', this.#escKeyDownHandler);
-    this.#popupFilmDetailsComponent.setClosePopupClickHandler(this.#handleClosePopupClick);
+    this.#restoreHandlers();
+
     this.#mode = Mode.OPENING;
   }
 
   resetView = () => {
     if (this.#mode !== Mode.DEFAULT) {
-      this.#scrollPopupY = this.#popupComponent.element.scrollTop;
       this.#handleClosePopupClick();
     }
   }
 
-  scrollPopup = (scrollY) => {
-    this.#popupComponent.element.scrollTo(0, scrollY);
+  setOpenCard = (card) => {
+    this.#card = card;
   }
 
-  handleAddToWatchListPopupClick = () => {
-    this.resetView();
-    this.#updateMovie(
-      UserAction.UPDATE_MOVIE,
-      UpdateType.MINOR_POPUP,
-      {...this.#card, userDetails: {...this.#card.userDetails, watchlist: !this.#card.userDetails.watchlist}},
-    );
+  reInitControlButtons = (update) => {
+    this.#updateControlButtons(update);
   }
 
-  handleMarkAsWatchedPopupClick = () => {
-    this.resetView();
-    this.#updateMovie(
-      UserAction.UPDATE_MOVIE,
-      UpdateType.MINOR_POPUP,
-      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched}},
-    );
+  reInitComments = (update) => {
+    this.#updateCommentsList(update);
+    this.#updateComments(update);
   }
 
-  handleFavoritePopupClick = () => {
-    this.resetView();
-    this.#updateMovie(
-      UserAction.UPDATE_MOVIE,
-      UpdateType.MINOR_POPUP,
-      {...this.#card, userDetails: {...this.#card.userDetails, favorite: !this.#card.userDetails.favorite}},
-    );
+  #createNewComponentsPopup = (card, comments) => {
+    this.#popupComponent = new PopupView();
+    this.#popupFilmDetailsComponent = new PopupFilmDetailsView(card);
+    this.#popupControlButtonsComponent = new PopupControlButtonsView(card);
+    this.#popupCommentsListComponent = new PopupCommentsListView(comments);
+    this.#popupCommentComponents = comments?.map((comment) => new PopupCommentView(comment));
+    this.#popupNewCommentComponent = new PopupNewCommentView();
+  }
+
+  #restoreHandlers = () => {
+    document.addEventListener('keydown', this.#escKeyDownHandler);
+    document.addEventListener('mousedown', this.#outPopupClickHandler);
+    this.#popupFilmDetailsComponent.setClosePopupClickHandler(this.#handleClosePopupClick);
+    this.#popupNewCommentComponent.setAddNewCommentHandler(this.#handleAddNewCommentKeydown);
+  }
+
+  #updateCommentsList = (update) => {
+    this.#popupCommentsListComponent.resetData();
+    this.#popupCommentsListComponent.updateData(update);
+  }
+
+  #updateComments = (update) => {
+    this.#popupCommentComponents.forEach((component) => remove(component));
+    this.#popupCommentComponents = update?.map((comment) => new PopupCommentView(comment));
+
+    const commentsList = this.#popupCommentsListComponent.element.querySelector('.film-details__comments-list');
+
+    this.#popupCommentComponents.forEach((component) => {
+      render(commentsList, component, RenderPosition.AFTERBEGIN);
+      component.setDeleteButtonClickHandler(this.#handleDeleteCommentClick);
+    });
+
+    this.#renderPopupNewComment(commentsList);
+  }
+
+  #updateControlButtons = (update) => {
+    this.#popupControlButtonsComponent.resetData();
+    this.#popupControlButtonsComponent.updateData(update);
   }
 
   #renderPopupNewComment = (container) => {
@@ -95,16 +103,17 @@ export default class PopupPresenter {
   }
 
   #handleClosePopupClick = () => {
-    this.#setScrollY(this.#scrollPopupY);
-    this.#closeButtonClickHandler();
+    this.#handleСloseButtonClick();
+
     this.#popupNewCommentComponent.resetData();
     this.#popupNewCommentComponent.newCommentKeysHandlersRemove();
+
     document.removeEventListener('keydown', this.#escKeyDownHandler);
+    document.removeEventListener('mousedown', this.#outPopupClickHandler);
     this.#mode = Mode.DEFAULT;
-    this.#changeModeClose();
   }
 
-  #closeButtonClickHandler = () => {
+  #handleСloseButtonClick = () => {
     document.body.classList.remove('hide-overflow');
     remove(this.#popupComponent);
     remove(this.#popupFilmDetailsComponent);
@@ -113,9 +122,10 @@ export default class PopupPresenter {
     remove(this.#popupNewCommentComponent);
   }
 
-  #filmCardClickHandler = () => {
+  #handleCardClick = () => {
     const filmDetails = this.#popupComponent.element.querySelector('.film-details__inner');
     const commentsList = this.#popupCommentsListComponent.element.querySelector('.film-details__comments-list');
+    const filmDetailsInfo = this.#popupFilmDetailsComponent.element.querySelector('.film-details__info-wrap');
 
     this.#popupCommentComponents.forEach((component) => {
       render(commentsList, component, RenderPosition.BEFOREEND);
@@ -124,14 +134,15 @@ export default class PopupPresenter {
 
     this.#renderPopupNewComment(commentsList);
     render(filmDetails, this.#popupCommentsListComponent, RenderPosition.BEFOREEND);
+    render(filmDetailsInfo, this.#popupControlButtonsComponent, RenderPosition.AFTEREND);
     render(filmDetails, this.#popupFilmDetailsComponent, RenderPosition.AFTERBEGIN);
     render(document.body, this.#popupComponent, RenderPosition.BEFOREEND);
 
     document.body.classList.add('hide-overflow');
 
-    this.#popupFilmDetailsComponent.setAddToWatchListClickHandler(this.handleAddToWatchListPopupClick);
-    this.#popupFilmDetailsComponent.setMarkAsWatchedClickHandler(this.handleMarkAsWatchedPopupClick);
-    this.#popupFilmDetailsComponent.setFavoriteClickHandler(this.handleFavoritePopupClick);
+    this.#popupControlButtonsComponent.setAddToWatchListClickHandler(this.#handleAddToWatchListPopupClick);
+    this.#popupControlButtonsComponent.setMarkAsWatchedClickHandler(this.#handleMarkAsWatchedPopupClick);
+    this.#popupControlButtonsComponent.setFavoriteClickHandler(this.#handleFavoritePopupClick);
   }
 
   #escKeyDownHandler = (evt) => {
@@ -141,8 +152,39 @@ export default class PopupPresenter {
     }
   }
 
+  #outPopupClickHandler = (evt) => {
+    const isClickInside = this.#popupComponent.element.contains(evt.target);
+
+    if (!isClickInside) {
+      this.#handleClosePopupClick();
+    }
+  }
+
+  #handleAddToWatchListPopupClick = () => {
+    this.#updateMovie(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      {...this.#card, userDetails: {...this.#card.userDetails, watchlist: !this.#card.userDetails.watchlist}},
+    );
+  }
+
+  #handleMarkAsWatchedPopupClick = () => {
+    this.#updateMovie(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched}},
+    );
+  }
+
+  #handleFavoritePopupClick = () => {
+    this.#updateMovie(
+      UserAction.UPDATE_MOVIE,
+      UpdateType.MINOR_POPUP,
+      {...this.#card, userDetails: {...this.#card.userDetails, favorite: !this.#card.userDetails.favorite}},
+    );
+  }
+
   #handleAddNewCommentKeydown = (newComment) => {
-    this.resetView();
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.PATCH,
@@ -152,11 +194,10 @@ export default class PopupPresenter {
 
   #handleDeleteCommentClick = (commentId) => {
     const indexDeletedComment = this.#card.comments.findIndex(({id}) => id === commentId);
-    const newCard = {...this.#card, comments: {...this.#card.comments}};
+    const newCard = {...this.#card, comments: Object.values(this.#card.comments)};
 
     newCard.comments.splice(indexDeletedComment, 1);
 
-    this.resetView();
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.PATCH,
