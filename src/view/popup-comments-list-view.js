@@ -1,26 +1,71 @@
 import AbstractView from './abstract-view.js';
 
-const createCommentsListTemplate = ({comments}) => (
-  `<div class="film-details__bottom-container">
-    <section class="film-details__comments-wrap">
-      <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
-      <ul class="film-details__comments-list">
+const TextComments = {
+  LOADING: 'are loading',
+  FAIL: 'did not load.',
+};
 
-      </ul>
+const getTextComments = (loading, fail, comments) => {
+  if (loading) {
+    return TextComments.LOADING;
+  }
+  return fail ? TextComments.FAIL : comments.length;
+};
 
-    </section>
-  </div>`
-);
+const createCommentsListTemplate = (comments) => {
+  const loading = comments[0]?.loading;
+  const fail = comments[0]?.fail;
+
+  return (
+    `<div class="film-details__bottom-container">
+      <section class="film-details__comments-wrap">
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ getTextComments(loading, fail, comments) }</span></h3>
+        <ul class="film-details__comments-list">
+
+        </ul>
+
+      </section>
+    </div>`
+  );
+};
 
 export default class PopupCommentsListView extends AbstractView {
-  #card = null;
+  _data = {};
 
-  constructor (card) {
+  constructor (comments) {
     super();
-    this.#card = card;
+    this._data = {...this._data, ...comments};
   }
 
   get template() {
-    return createCommentsListTemplate(this.#card);
+    return createCommentsListTemplate(Object.values(this._data));
+  }
+
+  updateComments = (update, justDataUpdating) => {
+    if (!update) {
+      return;
+    }
+
+    this._data = {...this._data, ...update};
+
+    if (justDataUpdating) {
+      return;
+    }
+
+    this.updateElement();
+  }
+
+  updateElement = () => {
+    const prevElement = this.element;
+    const parent = prevElement.parentElement;
+    this.removeElement();
+
+    const newElement = this.element;
+
+    parent.replaceChild(newElement, prevElement);
+  }
+
+  resetComments = () => {
+    this._data = {};
   }
 }

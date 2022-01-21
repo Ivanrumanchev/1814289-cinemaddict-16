@@ -2,6 +2,8 @@ import {MINUTES_IN_HOUR} from '../const.js';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import toSnakeCase from 'lodash/snakeCase';
+import toCamelCase from 'lodash/camelCase';
 dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter);
 
@@ -32,26 +34,40 @@ export const getDayFormatDate = (date) => dayjs(date).format('D MMMM YYYY');
 export const getFullFormatDate = (date) => dayjs(date).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 export const getHumanFormatDate = (date) => dayjs(date).fromNow();
 
-// for Generator
-export const getRandomDayDate = (daysGap) => dayjs().subtract(daysGap, 'day').toString();
-export const getRandomMinuteDate = (minutesGap) => dayjs().subtract(minutesGap, 'minute').toString();
-
-export const getDeepCopy = (inObject) => {
-  if (typeof inObject !== 'object' || inObject === null) {
-    return inObject;
-  }
-
-  const outObject = Array.isArray(inObject) ? [] : {};
-
-  for (const key in inObject) {
-    const value = inObject[key];
-
-    outObject[key] = getDeepCopy(value);
-  }
-
-  return outObject;
-};
-
 export const sortCardDate = (cardA, cardB) => dayjs(cardB.filmInfo.release.date).diff(dayjs(cardA.filmInfo.release.date));
 export const sortCardRating = (cardA, cardB) => cardB.filmInfo.totalRating - cardA.filmInfo.totalRating;
 export const sortCardComments = (cardA, cardB) => cardB.comments.length - cardA.comments.length;
+
+export const adaptToSnakeCase = (inObject) => {
+  const keyValues = Object.keys(inObject).map((key) => {
+    const value = inObject[key];
+    const keyInSnakeCase = toSnakeCase(key);
+
+    if (Array.isArray(value) || typeof value !== 'object' || value === null) {
+      return (key === keyInSnakeCase) ? {[key]: value} : {[keyInSnakeCase]: value};
+    }
+
+    const adaptedObject = adaptToSnakeCase(value);
+
+    return (key === keyInSnakeCase) ? {[key]: adaptedObject} : {[keyInSnakeCase]: adaptedObject};
+  });
+
+  return Object.assign({}, ...keyValues);
+};
+
+export const adaptToCamelCase = (inObject) => {
+  const keyValues = Object.keys(inObject).map((key) => {
+    const value = inObject[key];
+    const keyInCamelCase = toCamelCase(key);
+
+    if (Array.isArray(value) || typeof value !== 'object' || value === null) {
+      return (key === keyInCamelCase) ? {[key]: value} : {[keyInCamelCase]: value};
+    }
+
+    const adaptedObject = adaptToCamelCase(value);
+
+    return (key === keyInCamelCase) ? {[key]: adaptedObject} : {[keyInCamelCase]: adaptedObject};
+  });
+
+  return Object.assign({}, ...keyValues);
+};

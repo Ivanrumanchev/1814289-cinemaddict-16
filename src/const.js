@@ -6,6 +6,8 @@ export const SortType = {
 
 export const UserAction = {
   UPDATE_MOVIE: 'UPDATE_MOVIE',
+  ADD_COMMENT: 'ADD_COMMENT',
+  DELETE_COMMENT: 'DELETE_COMMENT',
 };
 
 export const UpdateType = {
@@ -14,6 +16,7 @@ export const UpdateType = {
   MINOR_POPUP: 'MINOR_POPUP',
   MAJOR: 'MAJOR',
   DESTROY: 'DESTROY',
+  INIT: 'INIT',
 };
 
 export const FilterType = {
@@ -25,3 +28,8 @@ export const FilterType = {
 };
 
 export const MINUTES_IN_HOUR = 60;
+
+export const Mode = {
+  DEFAULT: 'DEFAULT',
+  OPENING: 'OPENING',
+};
