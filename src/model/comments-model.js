@@ -1,6 +1,5 @@
 import AbstractObservable from '../utils/abstract-observable.js';
 import {UpdateType} from '../const.js';
-import {showAlert} from '../utils/loading.js';
 
 const commentsNoLoading = [{
   comment: 'Try updating the page later. Changes to comments will not be saved.',
@@ -12,6 +11,7 @@ const commentsNoLoading = [{
 export default class MoviesModel extends AbstractObservable {
   #comments = [];
   #apiService = null;
+  #loading = false;
 
   constructor(apiService) {
     super();
@@ -32,13 +32,21 @@ export default class MoviesModel extends AbstractObservable {
   }
 
   addComment = async (updateType, updatedComment, updatedMovie) => {
+    if (this.#loading) {
+      return;
+    }
+    this.#loading = true;
+
     try {
       const response = await this.#apiService.addComment(updatedMovie, updatedComment);
       this.#comments = response.comments;
 
+      this.#loading = false;
+
       this._notify(updateType);
     } catch(err) {
-      showAlert('Can\'t add comment');
+      this.#loading = false;
+      throw new Error('Can\'t add comment');
     }
   }
 
@@ -46,7 +54,7 @@ export default class MoviesModel extends AbstractObservable {
     const index = this.#comments.findIndex((comment) => comment.id === updatedCommentId);
 
     if (index === -1) {
-      showAlert('Can\'t delete unexisting comment');
+      throw new Error('Can\'t delete unexisting comment');
     }
 
     try {
@@ -55,7 +63,7 @@ export default class MoviesModel extends AbstractObservable {
 
       this._notify(updateType);
     } catch(err) {
-      showAlert('Can\'t delete comment');
+      throw new Error('Can\'t delete comment');
     }
   }
 }

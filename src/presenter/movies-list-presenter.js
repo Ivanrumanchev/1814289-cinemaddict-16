@@ -12,6 +12,7 @@ import {RenderPosition, render, remove} from '../utils/render.js';
 import {sortCardDate, sortCardRating, sortCardComments} from '../utils/common.js';
 import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
 import {filter} from '../utils/filter.js';
+import {showAlert} from '../utils/loading.js';
 
 const FILM_COUNT_PER_STEP = 5;
 const FILM_COUNT_EXTRA = 2;
@@ -329,13 +330,27 @@ export default class MoviesListPresenter {
     this.#commentsModel.init(this.#openPopupCard);
   }
 
-  #handleViewPopupAction = (actionType, updateType, comment, movie) => {
+  #handleViewPopupAction = async (actionType, updateType, comment, movie) => {
     switch (actionType) {
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, comment, movie);
+        this.#popupPresenter.setSavingState();
+
+        try {
+          await this.#commentsModel.addComment(updateType, comment, movie);
+        } catch(err) {
+          showAlert(err);
+          this.#popupPresenter.resetSavingState();
+        }
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, comment);
+        this.#popupPresenter.setDeletingState(comment);
+
+        try {
+          await this.#commentsModel.deleteComment(updateType, comment);
+        } catch(err) {
+          showAlert(err);
+          this.#popupPresenter.resetDeletingState(comment);
+        }
         break;
     }
   }
@@ -347,12 +362,13 @@ export default class MoviesListPresenter {
         break;
       case UpdateType.PATCH:
         this.#openPopupCard.comments = this.#commentsModel.comments.map((comment) => comment.id);
+
         this.#handleCardChange(this.#openPopupCard);
         this.#clearFilmsListMostCommented();
         this.#renderFilmsListMostCommented();
 
+        this.#popupPresenter.resetNewComment();
         this.#popupPresenter.setOpenCard(this.#openPopupCard);
-
         this.#popupPresenter.reInitComments(this.#commentsModel.comments);
         break;
     }

@@ -1,22 +1,23 @@
+import he from 'he';
 import SmartView from './smart-view.js';
-import {RenderPosition, render} from '../utils/render.js';
-
-const NewEmojiSize = {
-  WIDTH: 55,
-  HEIGHT: 55,
-};
 
 const NEW_COMMENT_KEY_CODE = [
   'Enter',
   'MetaLeft',
 ];
 
-const createNewCommentTemplate = () => (
+const createNewCommentTemplate = ({isDisabled, comment, emotion}) => (
   `<div class="film-details__new-comment">
-    <div class="film-details__add-emoji-label"></div>
+    <div class="film-details__add-emoji-label">
+      ${emotion ? `<img src="./images/emoji/${ emotion }.png" width="55" height="55" alt="emoji">` : ''}
+    </div>
 
     <label class="film-details__comment-label">
-      <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+      <textarea
+        class="film-details__comment-input"
+        placeholder="Select reaction below and write comment here"
+        name="comment"
+        ${isDisabled ? ' disabled' : ''}>${ comment ? he.encode(comment) : '' }</textarea>
     </label>
 
     <div class="film-details__emoji-list">
@@ -49,10 +50,15 @@ export default class PopupNewCommentView extends SmartView {
   constructor() {
     super();
     this.restoreHandlers();
+    this._data = {...this._data,
+      isDisabled: false,
+      comment: '',
+      emotion: '',
+    };
   }
 
   get template() {
-    return createNewCommentTemplate();
+    return createNewCommentTemplate(this._data);
   }
 
   restoreHandlers = () => {
@@ -60,14 +66,40 @@ export default class PopupNewCommentView extends SmartView {
       .addEventListener('click', this.#emojiClickHandler);
     this.element.querySelector('.film-details__comment-input')
       .addEventListener('input', this.#commentInputHandler);
+
+    if (this._data.comment && this._data.emotion) {
+      this.#newCommentKeysHandlersAdd();
+    }
   }
 
   resetNewComment = () => {
-    this._data = {};
+    this.updateData({
+      isDisabled: false,
+      comment: '',
+      emotion: '',
+    });
+  }
+
+  resetDisabled = () => {
+    this.shake( () => this.updateData({
+      isDisabled: false,
+    })
+    );
+  }
+
+  setDisabled = () => {
+    this.updateData({
+      isDisabled: true,
+    });
+
+    this.newCommentKeysHandlersRemove();
+
+    this.element.querySelector('.film-details__emoji-list')
+      .removeEventListener('click', this.#emojiClickHandler);
   }
 
   setAddNewCommentHandler = (callback) => {
-    this._callbacks.set('AddNewCommentClick', callback);
+    this._callbacks.set('AddNewCommentPressed', callback);
   }
 
   newCommentKeysHandlersRemove = () => {
@@ -89,7 +121,13 @@ export default class PopupNewCommentView extends SmartView {
     }
     this.#pressed.clear();
 
-    this._callbacks.get('AddNewCommentClick')(this._data);
+    this._callbacks.get('AddNewCommentPressed')(this.#parseDataToComment(this._data));
+  }
+
+  #parseDataToComment = (data) => {
+    const comment = {...data};
+    delete comment.isDisabled;
+    return comment;
   }
 
   #keyUpHandler = (evt) => {
@@ -101,21 +139,12 @@ export default class PopupNewCommentView extends SmartView {
       return;
     }
 
-    const newEmoji = evt.target.cloneNode(true);
     const newEmojiAttribute = evt.target.parentElement.getAttribute('for');
     const newEmojiName = newEmojiAttribute.slice(newEmojiAttribute.indexOf('-') + 1);
 
-    newEmoji.setAttribute('width', NewEmojiSize.WIDTH);
-    newEmoji.setAttribute('height', NewEmojiSize.HEIGHT);
-    newEmoji.setAttribute('alt', newEmojiAttribute);
-
-    const addEmojiLabel = this.element.querySelector('.film-details__add-emoji-label');
-    addEmojiLabel.innerHTML = '';
-    render(addEmojiLabel, newEmoji, RenderPosition.BEFOREEND);
-
     this.updateData({
       emotion: newEmojiName,
-    }, true);
+    });
 
     if (this._data.comment) {
       this.#newCommentKeysHandlersAdd();
