@@ -1,4 +1,4 @@
-import SmartView from './smart-view.js';
+import AbstractView from './abstract-view.js';
 
 const TextComments = {
   LOADING: 'are loading',
@@ -8,10 +8,8 @@ const TextComments = {
 const getTextComments = (loading, fail, comments) => {
   if (loading) {
     return TextComments.LOADING;
-  } else if (fail) {
-    return TextComments.FAIL;
   }
-  return comments.length;
+  return fail ? TextComments.FAIL : comments.length;
 };
 
 const createCommentsListTemplate = (comments) => {
@@ -31,7 +29,9 @@ const createCommentsListTemplate = (comments) => {
   );
 };
 
-export default class PopupCommentsListView extends SmartView {
+export default class PopupCommentsListView extends AbstractView {
+  _data = {};
+
   constructor (comments) {
     super();
     this._data = {...this._data, ...comments};
@@ -41,11 +41,31 @@ export default class PopupCommentsListView extends SmartView {
     return createCommentsListTemplate(Object.values(this._data));
   }
 
-  restoreHandlers = () => {
+  updateComments = (update, justDataUpdating) => {
+    if (!update) {
+      return;
+    }
 
+    this._data = {...this._data, ...update};
+
+    if (justDataUpdating) {
+      return;
+    }
+
+    this.updateElement();
   }
 
-  resetData = () => {
+  updateElement = () => {
+    const prevElement = this.element;
+    const parent = prevElement.parentElement;
+    this.removeElement();
+
+    const newElement = this.element;
+
+    parent.replaceChild(newElement, prevElement);
+  }
+
+  resetComments = () => {
     this._data = {};
   }
 }

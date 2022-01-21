@@ -62,7 +62,7 @@ export default class PopupNewCommentView extends SmartView {
       .addEventListener('input', this.#commentInputHandler);
   }
 
-  resetData = () => {
+  resetNewComment = () => {
     this._data = {};
   }
 

@@ -44,18 +44,12 @@ export const adaptToSnakeCase = (inObject) => {
     const keyInSnakeCase = toSnakeCase(key);
 
     if (Array.isArray(value) || typeof value !== 'object' || value === null) {
-      if (key === keyInSnakeCase) {
-        return { [key]: value };
-      }
-      return { [keyInSnakeCase]: value };
+      return (key === keyInSnakeCase) ? {[key]: value} : {[keyInSnakeCase]: value};
     }
 
     const adaptedObject = adaptToSnakeCase(value);
 
-    if (key === keyInSnakeCase) {
-      return { [key]: adaptedObject };
-    }
-    return { [keyInSnakeCase]: adaptedObject };
+    return (key === keyInSnakeCase) ? {[key]: adaptedObject} : {[keyInSnakeCase]: adaptedObject};
   });
 
   return Object.assign({}, ...keyValues);
@@ -67,18 +61,12 @@ export const adaptToCamelCase = (inObject) => {
     const keyInCamelCase = toCamelCase(key);
 
     if (Array.isArray(value) || typeof value !== 'object' || value === null) {
-      if (key === keyInCamelCase) {
-        return { [key]: value };
-      }
-      return { [keyInCamelCase]: value };
+      return (key === keyInCamelCase) ? {[key]: value} : {[keyInCamelCase]: value};
     }
 
     const adaptedObject = adaptToCamelCase(value);
 
-    if (key === keyInCamelCase) {
-      return { [key]: adaptedObject };
-    }
-    return { [keyInCamelCase]: adaptedObject };
+    return (key === keyInCamelCase) ? {[key]: adaptedObject} : {[keyInCamelCase]: adaptedObject};
   });
 
   return Object.assign({}, ...keyValues);

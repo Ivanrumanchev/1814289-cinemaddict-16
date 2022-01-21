@@ -47,6 +47,6 @@ export default class PopupCommentView extends SmartView {
 
   #deleteButtonClickHandler = (evt) => {
     evt.preventDefault();
-    this._callbacks.get('deleteCommentClick')(this.#comment);
+    this._callbacks.get('deleteCommentClick')(this.#comment?.id);
   }
 }

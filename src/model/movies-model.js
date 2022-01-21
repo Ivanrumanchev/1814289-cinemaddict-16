@@ -12,6 +12,7 @@ const LOADER_CONTAINER_STYLE = `
   top: 50%;
   text-align: center;
 `;
+
 export default class MoviesModel extends AbstractObservable {
   #movies = [];
   #apiService = null;

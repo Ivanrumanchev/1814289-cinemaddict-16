@@ -32,9 +32,7 @@ export default class PopupPresenter {
     this.#card = card;
 
     this.#createNewComponentsPopup(card, comments);
-
     this.#handleCardClick();
-
     this.#restoreHandlers();
 
     this.#mode = Mode.OPENING;
@@ -76,8 +74,8 @@ export default class PopupPresenter {
   }
 
   #reInitCommentsList = (update) => {
-    this.#popupCommentsListComponent.resetData();
-    this.#popupCommentsListComponent.updateData(update);
+    this.#popupCommentsListComponent.resetComments();
+    this.#popupCommentsListComponent.updateComments(update);
   }
 
   #reInitComments = (update) => {
@@ -95,7 +93,7 @@ export default class PopupPresenter {
   }
 
   #updateControlButtons = (update) => {
-    this.#popupControlButtonsComponent.resetData();
+    this.#popupControlButtonsComponent.resetControlButtons();
     this.#popupControlButtonsComponent.updateData(update);
   }
 
@@ -107,11 +105,12 @@ export default class PopupPresenter {
   #handleClosePopupClick = () => {
     this.#handleСloseButtonClick();
 
-    this.#popupNewCommentComponent.resetData();
+    this.#popupNewCommentComponent.resetNewComment();
     this.#popupNewCommentComponent.newCommentKeysHandlersRemove();
 
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     document.removeEventListener('mousedown', this.#outPopupClickHandler);
+
     this.#mode = Mode.DEFAULT;
   }
 
@@ -142,9 +141,9 @@ export default class PopupPresenter {
 
     document.body.classList.add('hide-overflow');
 
-    this.#popupControlButtonsComponent.setAddToWatchListClickHandler(this.#handleAddToWatchListPopupClick);
-    this.#popupControlButtonsComponent.setMarkAsWatchedClickHandler(this.#handleMarkAsWatchedPopupClick);
-    this.#popupControlButtonsComponent.setFavoriteClickHandler(this.#handleFavoritePopupClick);
+    this.#popupControlButtonsComponent.setAddToWatchListClickHandler(this.#handleAddToWatchClick);
+    this.#popupControlButtonsComponent.setMarkAsWatchedClickHandler(this.#handleWatchedClick);
+    this.#popupControlButtonsComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
   }
 
   #escKeyDownHandler = (evt) => {
@@ -162,7 +161,7 @@ export default class PopupPresenter {
     }
   }
 
-  #handleAddToWatchListPopupClick = () => {
+  #handleAddToWatchClick = () => {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
@@ -170,7 +169,7 @@ export default class PopupPresenter {
     );
   }
 
-  #handleMarkAsWatchedPopupClick = () => {
+  #handleWatchedClick = () => {
     const today = new Date();
 
     this.#updateMovie(
@@ -180,7 +179,7 @@ export default class PopupPresenter {
     );
   }
 
-  #handleFavoritePopupClick = () => {
+  #handleFavoriteClick = () => {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
@@ -197,12 +196,11 @@ export default class PopupPresenter {
     );
   }
 
-  #handleDeleteCommentClick = (comment) => {
+  #handleDeleteCommentClick = (commentId) => {
     this.#updateComments(
       UserAction.DELETE_COMMENT,
       UpdateType.PATCH,
-      comment,
-      this.#card,
+      commentId,
     );
   }
 }

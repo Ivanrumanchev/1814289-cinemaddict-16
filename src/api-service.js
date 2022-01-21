@@ -50,9 +50,9 @@ export default class ApiService {
     return parsedResponse;
   }
 
-  deleteComment = async (comment) => {
+  deleteComment = async (commentId) => {
     const response = await this.#load({
-      url: `comments/${comment.id}`,
+      url: `comments/${commentId}`,
       method: Method.DELETE,
     });
 

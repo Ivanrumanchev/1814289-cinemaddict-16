@@ -42,15 +42,15 @@ export default class MoviesModel extends AbstractObservable {
     }
   }
 
-  deleteComment = async (updateType, updatedComment) => {
-    const index = this.#comments.findIndex((comment) => comment.id === updatedComment.id);
+  deleteComment = async (updateType, updatedCommentId) => {
+    const index = this.#comments.findIndex((comment) => comment.id === updatedCommentId);
 
     if (index === -1) {
       showAlert('Can\'t delete unexisting comment');
     }
 
     try {
-      await this.#apiService.deleteComment(updatedComment);
+      await this.#apiService.deleteComment(updatedCommentId);
       this.#comments.splice(index, 1);
 
       this._notify(updateType);

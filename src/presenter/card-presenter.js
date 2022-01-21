@@ -27,9 +27,9 @@ export default class CardPresenter {
     this.#cardComponent = new FilmCardView(card);
 
     this.#cardComponent.setOpenPopupClickHandler(this.#handleOpenPopupClick);
-    this.#cardComponent.setAddToWatchListClickHandler(this.#handleAddToWatchListCardClick);
-    this.#cardComponent.setMarkAsWatchedClickHandler(this.#handleMarkAsWatchedCardClick);
-    this.#cardComponent.setFavoriteClickHandler(this.#handleFavoriteCardClick);
+    this.#cardComponent.setAddToWatchListClickHandler(this.#handleAddToWatchClick);
+    this.#cardComponent.setMarkAsWatchedClickHandler(this.#handleWatchedClick);
+    this.#cardComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
 
     if (prevCardComponent === null) {
       render(this.#parentElement, this.#cardComponent, RenderPosition.BEFOREEND);
@@ -52,7 +52,7 @@ export default class CardPresenter {
     this.#handleOpenPopup();
   }
 
-  #handleAddToWatchListCardClick = () => {
+  #handleAddToWatchClick = () => {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
@@ -60,7 +60,7 @@ export default class CardPresenter {
     );
   }
 
-  #handleMarkAsWatchedCardClick = () => {
+  #handleWatchedClick = () => {
     const today = new Date();
 
     this.#updateMovie(
@@ -70,7 +70,7 @@ export default class CardPresenter {
     );
   }
 
-  #handleFavoriteCardClick = () => {
+  #handleFavoriteClick = () => {
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,

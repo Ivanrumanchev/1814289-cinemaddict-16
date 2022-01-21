@@ -329,13 +329,13 @@ export default class MoviesListPresenter {
     this.#commentsModel.init(this.#openPopupCard);
   }
 
-  #handleViewPopupAction = (actionType, updateType, movie, comment) => {
+  #handleViewPopupAction = (actionType, updateType, comment, movie) => {
     switch (actionType) {
       case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, movie, comment);
+        this.#commentsModel.addComment(updateType, comment, movie);
         break;
       case UserAction.DELETE_COMMENT:
-        this.#commentsModel.deleteComment(updateType, movie, comment);
+        this.#commentsModel.deleteComment(updateType, comment);
         break;
     }
   }
