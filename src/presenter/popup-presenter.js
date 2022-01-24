@@ -57,6 +57,28 @@ export default class PopupPresenter {
     this.#reInitComments(update);
   }
 
+  resetNewComment = () => {
+    this.#popupNewCommentComponent.resetNewComment();
+  }
+
+  resetSavingState = () => {
+    this.#popupNewCommentComponent.resetDisabled();
+  }
+
+  resetDeletingState = (deletedCommentId) => {
+    const deletedCommentComponent = this.#popupCommentComponents?.find((component) => component.commentId === deletedCommentId);
+    deletedCommentComponent.resetDisabled();
+  }
+
+  setSavingState = () => {
+    this.#popupNewCommentComponent.setDisabled();
+  }
+
+  setDeletingState = (deletedCommentId) => {
+    const deletedCommentComponent = this.#popupCommentComponents?.find((component) => component.commentId === deletedCommentId);
+    deletedCommentComponent.setDisabled();
+  }
+
   #createNewComponentsPopup = (card, comments) => {
     this.#popupComponent = new PopupView();
     this.#popupFilmDetailsComponent = new PopupFilmDetailsView(card);
