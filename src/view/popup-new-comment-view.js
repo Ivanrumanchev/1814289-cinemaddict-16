@@ -1,10 +1,7 @@
 import he from 'he';
 import SmartView from './smart-view.js';
 
-const NEW_COMMENT_KEY_CODE = [
-  'Enter',
-  'MetaLeft',
-];
+const ENTER_KEY_CODE = 'Enter';
 
 const createNewCommentTemplate = ({isDisabled, comment, emotion}) => (
   `<div class="film-details__new-comment">
@@ -45,8 +42,6 @@ const createNewCommentTemplate = ({isDisabled, comment, emotion}) => (
 );
 
 export default class PopupNewCommentView extends SmartView {
-  #pressed = new Set();
-
   constructor() {
     super();
     this.restoreHandlers();
@@ -68,7 +63,7 @@ export default class PopupNewCommentView extends SmartView {
       .addEventListener('input', this.#commentInputHandler);
 
     if (this._data.comment && this._data.emotion) {
-      this.#newCommentKeysHandlersAdd();
+      this.#newCommentKeysHandlerAdd();
     }
   }
 
@@ -78,6 +73,8 @@ export default class PopupNewCommentView extends SmartView {
       comment: '',
       emotion: '',
     });
+
+    this.#newCommentKeysHandlerRemove();
   }
 
   resetDisabled = () => {
@@ -92,7 +89,7 @@ export default class PopupNewCommentView extends SmartView {
       isDisabled: true,
     });
 
-    this.newCommentKeysHandlersRemove();
+    this.#newCommentKeysHandlerRemove();
 
     this.element.querySelector('.film-details__emoji-list')
       .removeEventListener('click', this.#emojiClickHandler);
@@ -102,36 +99,24 @@ export default class PopupNewCommentView extends SmartView {
     this._callbacks.set('AddNewCommentPressed', callback);
   }
 
-  newCommentKeysHandlersRemove = () => {
+  #newCommentKeysHandlerRemove = () => {
     document.removeEventListener('keydown', this.#keysPressedHandler);
-    document.removeEventListener('keyup', this.#keyUpHandler);
   }
 
-  #newCommentKeysHandlersAdd = () => {
+  #newCommentKeysHandlerAdd = () => {
     document.addEventListener('keydown', this.#keysPressedHandler);
-    document.addEventListener('keyup', this.#keyUpHandler);
   }
 
   #keysPressedHandler = (evt) => {
-    this.#pressed.add(evt.code);
-    for (const keyCode of NEW_COMMENT_KEY_CODE) {
-      if (!this.#pressed.has(keyCode)) {
-        return;
-      }
+    if ( (evt.code === ENTER_KEY_CODE) && (evt.ctrlKey || evt.metaKey) ) {
+      this._callbacks.get('AddNewCommentPressed')(this.#parseDataToComment(this._data));
     }
-    this.#pressed.clear();
-
-    this._callbacks.get('AddNewCommentPressed')(this.#parseDataToComment(this._data));
   }
 
   #parseDataToComment = (data) => {
     const comment = {...data};
     delete comment.isDisabled;
     return comment;
-  }
-
-  #keyUpHandler = (evt) => {
-    this.#pressed.delete(evt.code);
   }
 
   #emojiClickHandler = (evt) => {
@@ -147,7 +132,7 @@ export default class PopupNewCommentView extends SmartView {
     });
 
     if (this._data.comment) {
-      this.#newCommentKeysHandlersAdd();
+      this.#newCommentKeysHandlerAdd();
     }
   }
 
@@ -158,11 +143,11 @@ export default class PopupNewCommentView extends SmartView {
     }, true);
 
     if (this._data.emotion) {
-      this.#newCommentKeysHandlersAdd();
+      this.#newCommentKeysHandlerAdd();
     }
 
     if (this._data.comment.length === 0) {
-      this.newCommentKeysHandlersRemove();
+      this.#newCommentKeysHandlerRemove();
     }
   }
 }

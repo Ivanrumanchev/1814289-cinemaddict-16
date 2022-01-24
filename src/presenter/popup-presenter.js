@@ -128,7 +128,6 @@ export default class PopupPresenter {
     this.#handleСloseButtonClick();
 
     this.#popupNewCommentComponent.resetNewComment();
-    this.#popupNewCommentComponent.newCommentKeysHandlersRemove();
 
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     document.removeEventListener('mousedown', this.#outPopupClickHandler);
