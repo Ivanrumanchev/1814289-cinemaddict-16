@@ -8,7 +8,7 @@ const commentsNoLoading = [{
   fail: true,
 }];
 
-export default class MoviesModel extends AbstractObservable {
+export default class CommentsModel extends AbstractObservable {
   #comments = [];
   #apiService = null;
   #loading = false;
