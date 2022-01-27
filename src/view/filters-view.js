@@ -6,9 +6,9 @@ const createFilterItemTemplate = (filter, currentFilterType) => {
   return (
     `<a
       href="#${ type }"
-      class="main-navigation__item ${type === currentFilterType ? 'main-navigation__item--active' : ''}">
-      ${name}
-      ${count ? `<span class="main-navigation__item-count">${ count } </span>` : ''}
+      class="main-navigation__item ${ type === currentFilterType ? 'main-navigation__item--active' : '' }">
+      ${ name }
+      ${ count ? `<span class="main-navigation__item-count">${ count } </span>` : '' }
     </a>`
   );
 };
@@ -20,10 +20,9 @@ const createFiltersTemplate = (filterItems, currentFilterType) => {
 
   return `<nav class="main-navigation">
     <div class="main-navigation__items">
-
-      ${filterItemsTemplate}
+      ${ filterItemsTemplate }
     </div>
-    <a href="#stats" class="main-navigation__additional${currentFilterType === 'stats' ? ' main-navigation__additional--active' : '' }">Stats</a>
+    <a href="#stats" class="main-navigation__additional${ currentFilterType === 'stats' ? ' main-navigation__additional--active' : '' }">Stats</a>
   </nav>`;
 };
 
@@ -43,8 +42,18 @@ export default class FiltersView extends AbstractView {
 
   setFilterTypeChangeHandler = (callback) => {
     const navigationElement = this.element.querySelector('.main-navigation__items');
+
     this._callbacks.set('filterTypeChange', callback);
+
     navigationElement.addEventListener('click', this.#filterTypeChangeHandler);
+  }
+
+  setStatisticsChangeHandler = (callback) => {
+    const statisticsElement = this.element.querySelector('.main-navigation__additional');
+
+    this._callbacks.set('statisticsChange', callback);
+
+    statisticsElement.addEventListener('click', this.#statisticsChangeHandler);
   }
 
   #filterTypeChangeHandler = (evt) => {
@@ -61,12 +70,6 @@ export default class FiltersView extends AbstractView {
     if (href?.length) {
       this._callbacks.get('filterTypeChange')(href);
     }
-  }
-
-  setStatisticsChangeHandler = (callback) => {
-    const statisticsElement = this.element.querySelector('.main-navigation__additional');
-    this._callbacks.set('statisticsChange', callback);
-    statisticsElement.addEventListener('click', this.#statisticsChangeHandler);
   }
 
   #statisticsChangeHandler = (evt) => {

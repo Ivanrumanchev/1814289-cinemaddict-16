@@ -49,12 +49,17 @@ export default class PopupPresenter {
   }
 
   reInitControlButtons = (update) => {
-    this.#updateControlButtons(update);
+    this.#popupControlButtonsComponent.resetControlButtons();
+    this.#popupControlButtonsComponent.updateData(update);
   }
 
-  reInitComments = (update) => {
-    this.#reInitCommentsList(update);
-    this.#reInitComments(update);
+  reInitComments = (comments) => {
+    this.#reInitCommentsList(comments);
+
+    const fail = comments[0]?.fail;
+    if (!fail) {
+      this.#reInitComments(comments);
+    }
   }
 
   resetNewComment = () => {
@@ -66,7 +71,7 @@ export default class PopupPresenter {
   }
 
   resetDeletingState = (deletedCommentId) => {
-    const deletedCommentComponent = this.#popupCommentComponents?.find((component) => component.commentId === deletedCommentId);
+    const deletedCommentComponent = this.#popupCommentComponents.find((component) => component.commentId === deletedCommentId);
     deletedCommentComponent.resetDisabled();
   }
 
@@ -75,7 +80,7 @@ export default class PopupPresenter {
   }
 
   setDeletingState = (deletedCommentId) => {
-    const deletedCommentComponent = this.#popupCommentComponents?.find((component) => component.commentId === deletedCommentId);
+    const deletedCommentComponent = this.#popupCommentComponents.find((component) => component.commentId === deletedCommentId);
     deletedCommentComponent.setDisabled();
   }
 
@@ -84,7 +89,7 @@ export default class PopupPresenter {
     this.#popupFilmDetailsComponent = new PopupFilmDetailsView(card);
     this.#popupControlButtonsComponent = new PopupControlButtonsView(card);
     this.#popupCommentsListComponent = new PopupCommentsListView(comments);
-    this.#popupCommentComponents = comments?.map((comment) => new PopupCommentView(comment));
+    this.#popupCommentComponents = comments.map((comment) => new PopupCommentView(comment));
     this.#popupNewCommentComponent = new PopupNewCommentView();
   }
 
@@ -95,14 +100,14 @@ export default class PopupPresenter {
     this.#popupNewCommentComponent.setAddNewCommentHandler(this.#handleAddNewCommentKeydown);
   }
 
-  #reInitCommentsList = (update) => {
+  #reInitCommentsList = (comments) => {
     this.#popupCommentsListComponent.resetComments();
-    this.#popupCommentsListComponent.updateComments(update);
+    this.#popupCommentsListComponent.updateComments(comments);
   }
 
-  #reInitComments = (update) => {
-    this.#popupCommentComponents.forEach((component) => remove(component));
-    this.#popupCommentComponents = update?.map((comment) => new PopupCommentView(comment));
+  #reInitComments = (comments) => {
+    this.#popupCommentComponents.forEach(remove);
+    this.#popupCommentComponents = comments.map((comment) => new PopupCommentView(comment));
 
     const commentsList = this.#popupCommentsListComponent.element.querySelector('.film-details__comments-list');
 
@@ -112,11 +117,6 @@ export default class PopupPresenter {
     });
 
     this.#renderPopupNewComment(commentsList);
-  }
-
-  #updateControlButtons = (update) => {
-    this.#popupControlButtonsComponent.resetControlButtons();
-    this.#popupControlButtonsComponent.updateData(update);
   }
 
   #renderPopupNewComment = (container) => {
@@ -140,21 +140,14 @@ export default class PopupPresenter {
     remove(this.#popupComponent);
     remove(this.#popupFilmDetailsComponent);
     remove(this.#popupCommentsListComponent);
-    this.#popupCommentComponents.forEach((component) => remove(component));
+    this.#popupCommentComponents.forEach(remove);
     remove(this.#popupNewCommentComponent);
   }
 
   #handleCardClick = () => {
     const filmDetails = this.#popupComponent.element.querySelector('.film-details__inner');
-    const commentsList = this.#popupCommentsListComponent.element.querySelector('.film-details__comments-list');
     const filmDetailsInfo = this.#popupFilmDetailsComponent.element.querySelector('.film-details__info-wrap');
 
-    this.#popupCommentComponents.forEach((component) => {
-      render(commentsList, component, RenderPosition.BEFOREEND);
-      component.setDeleteButtonClickHandler(this.#handleDeleteCommentClick);
-    });
-
-    this.#renderPopupNewComment(commentsList);
     render(filmDetails, this.#popupCommentsListComponent, RenderPosition.BEFOREEND);
     render(filmDetailsInfo, this.#popupControlButtonsComponent, RenderPosition.AFTEREND);
     render(filmDetails, this.#popupFilmDetailsComponent, RenderPosition.AFTERBEGIN);
@@ -183,28 +176,40 @@ export default class PopupPresenter {
   }
 
   #handleAddToWatchClick = () => {
+    const updatedCard = {...this.#card,
+      userDetails: {...this.#card.userDetails,
+        watchlist: !this.#card.userDetails.watchlist}};
+
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      {...this.#card, userDetails: {...this.#card.userDetails, watchlist: !this.#card.userDetails.watchlist}},
+      updatedCard,
     );
   }
 
   #handleWatchedClick = () => {
     const today = new Date();
+    const updatedCard = {...this.#card,
+      userDetails: {...this.#card.userDetails,
+        alreadyWatched: !this.#card.userDetails.alreadyWatched,
+        watchingDate: today.toISOString()}};
 
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched, watchingDate: today.toISOString()}},
+      updatedCard,
     );
   }
 
   #handleFavoriteClick = () => {
+    const updatedCard = {...this.#card,
+      userDetails: {...this.#card.userDetails,
+        favorite: !this.#card.userDetails.favorite}};
+
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR_POPUP,
-      {...this.#card, userDetails: {...this.#card.userDetails, favorite: !this.#card.userDetails.favorite}},
+      updatedCard,
     );
   }
 

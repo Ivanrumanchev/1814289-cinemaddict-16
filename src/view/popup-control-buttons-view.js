@@ -15,7 +15,7 @@ export default class PopupControlButtonsView extends SmartView {
   }
 
   get template() {
-    return createControlButtonsTemplate(this._data?.userDetails);
+    return createControlButtonsTemplate(this._data.userDetails);
   }
 
   resetControlButtons = () => {

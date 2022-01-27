@@ -1,9 +1,10 @@
-import {MINUTES_IN_HOUR} from '../const.js';
 import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import toSnakeCase from 'lodash/snakeCase';
 import toCamelCase from 'lodash/camelCase';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import {MINUTES_IN_HOUR} from '../const.js';
+
 dayjs.extend(relativeTime);
 dayjs.extend(isSameOrAfter);
 
@@ -14,6 +15,12 @@ const DateRange = {
   YEAR: '365',
 };
 
+const DateFormat = {
+  YEAR: 'YYYY',
+  DAY: 'd',
+  FULL: 'D MMMM YYYY'
+};
+
 export const DateFrom = {
   TODAY: dayjs().subtract(DateRange.TODAY, 'day').toDate(),
   WEEK: dayjs().subtract(DateRange.WEEK, 'day').toDate(),
@@ -21,17 +28,17 @@ export const DateFrom = {
   YEAR: dayjs().subtract(DateRange.YEAR, 'day').toDate(),
 };
 
-export const isAfterDate = (dateTarget, dateFrom) => dayjs(dateTarget).isSameOrAfter(dateFrom, 'd');
+export const isAfterDate = (dateTarget, dateFrom) => dayjs(dateTarget).isSameOrAfter(dateFrom, DateFormat.DAY);
 
 export const getTimeFromMins = (mins) => {
   const hours = Math.trunc(mins/MINUTES_IN_HOUR);
   const minutes = mins % MINUTES_IN_HOUR;
+
   return `${ hours }h ${minutes}m`;
 };
 
-export const getYearFormatDate = (date) => dayjs(date).format('YYYY');
-export const getDayFormatDate = (date) => dayjs(date).format('D MMMM YYYY');
-export const getFullFormatDate = (date) => dayjs(date).format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+export const getYearFormatDate = (date) => dayjs(date).format(DateFormat.YEAR);
+export const getDayFormatDate = (date) => dayjs(date).format(DateFormat.FULL);
 export const getHumanFormatDate = (date) => dayjs(date).fromNow();
 
 export const sortCardDate = (cardA, cardB) => dayjs(cardB.filmInfo.release.date).diff(dayjs(cardA.filmInfo.release.date));

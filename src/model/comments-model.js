@@ -1,9 +1,7 @@
-import AbstractObservable from '../utils/abstract-observable.js';
+import AbstractObservable from './abstract-observable.js';
 import {UpdateType} from '../const.js';
 
-const commentsNoLoading = [{
-  comment: 'Try updating the page later. Changes to comments will not be saved.',
-  emotion: 'puke',
+const failLoadingComments = [{
   loading: false,
   fail: true,
 }];
@@ -26,7 +24,7 @@ export default class CommentsModel extends AbstractObservable {
     try {
       this.#comments = await this.#apiService.getComments(movie.id);
     } catch(err) {
-      this.#comments = commentsNoLoading;
+      this.#comments = failLoadingComments;
     }
     this._notify(UpdateType.INIT);
   }

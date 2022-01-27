@@ -17,5 +17,6 @@ export const getRank = (quantityFilms) => {
   } else if ( (quantityFilms > QuantityLevel.NOVICE) && (quantityFilms <= QuantityLevel.FAN) ) {
     return Ranks.FAN;
   }
+
   return Ranks.MOVIE_BUFF;
 };

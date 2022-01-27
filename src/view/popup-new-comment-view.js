@@ -6,7 +6,7 @@ const ENTER_KEY_CODE = 'Enter';
 const createNewCommentTemplate = ({isDisabled, comment, emotion}) => (
   `<div class="film-details__new-comment">
     <div class="film-details__add-emoji-label">
-      ${emotion ? `<img src="./images/emoji/${ emotion }.png" width="55" height="55" alt="emoji">` : ''}
+      ${ emotion ? `<img src="./images/emoji/${ emotion }.png" width="55" height="55" alt="emoji">` : '' }
     </div>
 
     <label class="film-details__comment-label">
@@ -14,7 +14,7 @@ const createNewCommentTemplate = ({isDisabled, comment, emotion}) => (
         class="film-details__comment-input"
         placeholder="Select reaction below and write comment here"
         name="comment"
-        ${isDisabled ? ' disabled' : ''}>${ comment ? he.encode(comment) : '' }</textarea>
+        ${ isDisabled ? ' disabled' : ''}>${ comment ? he.encode(comment) : '' }</textarea>
     </label>
 
     <div class="film-details__emoji-list">
@@ -108,7 +108,7 @@ export default class PopupNewCommentView extends SmartView {
   }
 
   #keysPressedHandler = (evt) => {
-    if ( (evt.code === ENTER_KEY_CODE) && (evt.ctrlKey || evt.metaKey) ) {
+    if ((evt.code === ENTER_KEY_CODE) && (evt.ctrlKey || evt.metaKey)) {
       this._callbacks.get('AddNewCommentPressed')(this.#parseDataToComment(this._data));
     }
   }
@@ -116,6 +116,7 @@ export default class PopupNewCommentView extends SmartView {
   #parseDataToComment = (data) => {
     const comment = {...data};
     delete comment.isDisabled;
+
     return comment;
   }
 
