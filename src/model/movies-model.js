@@ -1,17 +1,9 @@
-import AbstractObservable from '../utils/abstract-observable.js';
+import AbstractObservable from './abstract-observable.js';
 import {UpdateType} from '../const.js';
 import {adaptToCamelCase} from '../utils/common.js';
 import {showAlert} from '../utils/loading.js';
 
-import {getLoaderDebounceTemplate} from '../utils/loading.js';
-
-const LOADER_CONTAINER_STYLE = `
-  z-index: 100;
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  text-align: center;
-`;
+import {createLoadingContainer} from '../utils/loading.js';
 
 export default class MoviesModel extends AbstractObservable {
   #movies = [];
@@ -34,6 +26,7 @@ export default class MoviesModel extends AbstractObservable {
     } catch(err) {
       this.#movies = [];
     }
+
     this._notify(UpdateType.INIT);
   }
 
@@ -49,27 +42,22 @@ export default class MoviesModel extends AbstractObservable {
       showAlert('Can\'t update unexisting movie');
     }
 
-    const loadingContainer = document.createElement('div');
-    loadingContainer.innerHTML = getLoaderDebounceTemplate();
-    loadingContainer.style = LOADER_CONTAINER_STYLE;
+    const loadingContainer = createLoadingContainer();
     document.body.append(loadingContainer);
 
     try {
       const response = await this.#apiService.updateMovie(update);
       const updatedMovie = this.#adaptToClient(response);
 
-      this.#loading = false;
-      loadingContainer.remove();
-
       this.#movies.splice(index, 1, updatedMovie);
 
       this._notify(updateType, updatedMovie);
     } catch(err) {
       showAlert('Can\'t update movie');
-
-      loadingContainer.remove();
-      this.#loading = false;
     }
+
+    loadingContainer.remove();
+    this.#loading = false;
   }
 
   #adaptToClient = (movie) => adaptToCamelCase(movie);

@@ -1,4 +1,4 @@
-import { adaptToSnakeCase } from './utils/common.js';
+import {adaptToSnakeCase} from './utils/common.js';
 
 const Method = {
   GET: 'GET',

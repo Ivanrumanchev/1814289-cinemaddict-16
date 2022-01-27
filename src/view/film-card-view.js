@@ -2,13 +2,11 @@ import {getTimeFromMins, getYearFormatDate} from '../utils/common.js';
 import AbstractView from './abstract-view.js';
 
 const MAX_LENGTH_DESCRIPTION = 140;
+const ELLIPSIS_CODE = 8230;
 
-const cutString = (string) => {
-  if (string.length > MAX_LENGTH_DESCRIPTION) {
-    return `${string.slice(0, (MAX_LENGTH_DESCRIPTION - 1) )}${String.fromCharCode(8230)}`;
-  }
-  return string;
-};
+const cutString = (string) => (string.length > MAX_LENGTH_DESCRIPTION)
+  ? `${ string.slice(0, (MAX_LENGTH_DESCRIPTION - 1)) }${ String.fromCharCode(ELLIPSIS_CODE) }`
+  : string;
 
 const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
   const {title, totalRating, poster, release, runtime, genre, description} = filmInfo;
@@ -26,7 +24,7 @@ const createFilmCardTemplate = ({comments, filmInfo, userDetails}) => {
         </p>
         <img src=${ poster } alt="" class="film-card__poster">
         <p class="film-card__description">${ cutString(description) }</p>
-        <span class="film-card__comments">${comments.length} comments</span>
+        <span class="film-card__comments">${ comments.length } comments</span>
       </a>
       <div class="film-card__controls">
         <button class="film-card__controls-item film-card__controls-item--add-to-watchlist${ watchlist ? ' film-card__controls-item--active' : '' }" type="button">Add to watchlist</button>

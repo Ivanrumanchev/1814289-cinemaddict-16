@@ -1,6 +1,6 @@
 import FilmCardView from '../view/film-card-view.js';
 import {RenderPosition, render, remove, replace} from '../utils/render.js';
-import {UserAction, UpdateType/* , Mode */} from '../const.js';
+import {UserAction, UpdateType} from '../const.js';
 
 export default class CardPresenter {
   #parentElement = null;
@@ -26,13 +26,11 @@ export default class CardPresenter {
 
     this.#cardComponent = new FilmCardView(card);
 
-    this.#cardComponent.setOpenPopupClickHandler(this.#handleOpenPopupClick);
-    this.#cardComponent.setAddToWatchListClickHandler(this.#handleAddToWatchClick);
-    this.#cardComponent.setMarkAsWatchedClickHandler(this.#handleWatchedClick);
-    this.#cardComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+    this.#setHandlers();
 
     if (prevCardComponent === null) {
       render(this.#parentElement, this.#cardComponent, RenderPosition.BEFOREEND);
+
       return;
     }
 
@@ -47,34 +45,53 @@ export default class CardPresenter {
     remove(this.#cardComponent);
   }
 
+  #setHandlers = () => {
+    this.#cardComponent.setOpenPopupClickHandler(this.#handleOpenPopupClick);
+    this.#cardComponent.setAddToWatchListClickHandler(this.#handleAddToWatchClick);
+    this.#cardComponent.setMarkAsWatchedClickHandler(this.#handleWatchedClick);
+    this.#cardComponent.setFavoriteClickHandler(this.#handleFavoriteClick);
+  }
+
   #handleOpenPopupClick = () => {
     this.#setOpenPopupCard(this.#card);
     this.#handleOpenPopup();
   }
 
   #handleAddToWatchClick = () => {
+    const updatedCard = {...this.#card,
+      userDetails: {...this.#card.userDetails,
+        watchlist: !this.#card.userDetails.watchlist}};
+
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      {...this.#card, userDetails: {...this.#card.userDetails, watchlist: !this.#card.userDetails.watchlist}},
+      updatedCard,
     );
   }
 
   #handleWatchedClick = () => {
     const today = new Date();
+    const updatedCard = {...this.#card,
+      userDetails: {...this.#card.userDetails,
+        alreadyWatched: !this.#card.userDetails.alreadyWatched,
+        watchingDate: today.toISOString()}};
 
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      {...this.#card, userDetails: {...this.#card.userDetails, alreadyWatched: !this.#card.userDetails.alreadyWatched, watchingDate: today.toISOString()}},
+      updatedCard,
     );
   }
 
   #handleFavoriteClick = () => {
+    const updatedCard = {...this.#card,
+      userDetails: {...this.#card.userDetails,
+        favorite: !this.#card.userDetails.favorite}};
+
     this.#updateMovie(
       UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
-      {...this.#card, userDetails: {...this.#card.userDetails, favorite: !this.#card.userDetails.favorite}},
+      updatedCard,
     );
   }
 }

@@ -1,6 +1,6 @@
-import SmartView from './smart-view.js';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import SmartView from './smart-view.js';
 
 import {DateFrom, isAfterDate} from '../utils/common.js';
 import {getRank} from '../utils/rank.js';
@@ -19,7 +19,7 @@ const DateRangeName = {
 const createTopGenreTemplate = (countCards, topGenre) => (
   countCards ? `<li class="statistic__text-item">
   <h4 class="statistic__item-title">Top genre</h4>
-  <p class="statistic__item-text">${topGenre}</p>
+  <p class="statistic__item-text">${ topGenre }</p>
   </li>` : ''
 );
 
@@ -64,11 +64,11 @@ const createStatisticsTemplate = (cardsInDateRange, topGenre, cards) => {
       <ul class="statistic__text-list">
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">You watched</h4>
-          <p class="statistic__item-text">${countCards} <span class="statistic__item-description">movies</span></p>
+          <p class="statistic__item-text">${ countCards } <span class="statistic__item-description">movies</span></p>
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Total duration</h4>
-          <p class="statistic__item-text">${totalHours} <span class="statistic__item-description">h</span> ${totalMinutes} <span class="statistic__item-description">m</span></p>
+          <p class="statistic__item-text">${ totalHours } <span class="statistic__item-description">h</span> ${ totalMinutes } <span class="statistic__item-description">m</span></p>
         </li>
         ${ topGenreTemplate }
       </ul>
@@ -127,7 +127,6 @@ export default class StatisticsView extends SmartView {
 
   #setCharts = () => {
     const statisticCtx = this.element.querySelector('.statistic__chart');
-
     this.#renderGenresChart(statisticCtx);
   }
 
@@ -186,13 +185,9 @@ export default class StatisticsView extends SmartView {
   }
 
   #getCardsInDateRange = () => {
-    const alreadyWatchedCards = this._data.cards.filter( (card) => card.userDetails.alreadyWatched );
+    const alreadyWatchedCards = this._data.cards.filter((card) => card.userDetails.alreadyWatched);
 
-    if (!this._data.isAllTime) {
-      return alreadyWatchedCards.filter( (card) => isAfterDate(card.userDetails.watchingDate, this._data.dateFrom) );
-    }
-
-    return alreadyWatchedCards;
+    return (!this._data.isAllTime) ? alreadyWatchedCards.filter((card) => isAfterDate(card.userDetails.watchingDate, this._data.dateFrom)) : alreadyWatchedCards;
   }
 
   #countCardsInDateRange = () => {

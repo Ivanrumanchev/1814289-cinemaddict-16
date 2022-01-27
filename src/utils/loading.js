@@ -11,6 +11,14 @@ const ALERT_CONTAINER_STYLE = `
   background-color: blue;
 `;
 
+const LOADER_CONTAINER_STYLE = `
+  z-index: 100;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  text-align: center;
+`;
+
 export const showAlert = (message) => {
   const alertContainer = document.createElement('div');
   alertContainer.style = ALERT_CONTAINER_STYLE;
@@ -85,3 +93,11 @@ export const getLoaderDebounceTemplate = () => (
     </g>
   </svg>`
 );
+
+export const createLoadingContainer = () => {
+  const container = document.createElement('div');
+  container.innerHTML = getLoaderDebounceTemplate();
+  container.style = LOADER_CONTAINER_STYLE;
+
+  return container;
+};
