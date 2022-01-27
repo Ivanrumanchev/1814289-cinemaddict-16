@@ -18,7 +18,7 @@ const DateRange = {
 const DateFormat = {
   YEAR: 'YYYY',
   DAY: 'd',
-  FULL: 'D MMMM YYYY'
+  FULL: 'D MMMM YYYY',
 };
 
 export const DateFrom = {
